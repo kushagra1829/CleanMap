@@ -28,6 +28,7 @@
   --color-medium: #f59e0b;  /* Orange */
   --color-low: #10b981;     /* Green */
   --color-progress: #3b82f6;/* Blue */
+  --color-cleaned: #9ca3af; /* Gray */
 
   /* Structural */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -245,8 +246,38 @@ html[data-theme="dark"] .theme-icon-dark { display: none; }
 .panel.active { opacity: 1; pointer-events: auto; visibility: visible; }
 
 /* ═════ Global Map ═════ */
-.map-view { display: flex; height: 100%; width: 100%; }
+.map-view { display: flex; height: 100%; width: 100%; position: relative; }
 #map { flex: 1; height: 100%; background: var(--bg-hover); z-index: 10; }
+
+.map-legend {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-sm);
+  z-index: 900; /* above map layer */
+  font-size: 0.8rem;
+  color: var(--text-main);
+  pointer-events: none;
+}
+.map-legend-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.map-legend-item:last-child { margin-bottom: 0; }
+.map-legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
 
 .reports-sidebar {
   width: 380px; background: var(--bg-surface); border-left: 1px solid var(--border-subtle);
@@ -312,7 +343,7 @@ html[data-theme="dark"] .theme-icon-dark { display: none; }
 }
 .status-pill.reported { color: var(--color-medium); }
 .status-pill.in-progress { color: var(--color-progress); }
-.status-pill.cleaned { color: var(--color-low); }
+.status-pill.cleaned { color: var(--color-cleaned); }
 .status-pill i { font-size: 1rem; }
 
 /* Buttons */

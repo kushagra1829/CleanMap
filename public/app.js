@@ -181,7 +181,7 @@ let reportTabMarkers = {};
 
 function createIcon(r) {
   let color = 'var(--color-medium)';
-  if (r.status === 'cleaned') color = 'var(--color-low)';
+  if (r.status === 'cleaned') color = 'var(--color-cleaned)';
   else if (r.status === 'in-progress') color = 'var(--color-progress)';
   else if (r.severity === 'high') color = 'var(--color-high)';
   else if (r.severity === 'low') color = 'var(--color-low)';
@@ -370,7 +370,7 @@ async function renderDashboard() {
       <div class="stat-title">In Progress</div>
     </div>
     <div class="stat-card">
-      <div class="stat-val" style="color:var(--color-low)">${cleaned}</div>
+      <div class="stat-val" style="color:var(--color-cleaned)">${cleaned}</div>
       <div class="stat-title">Resolved</div>
     </div>
   `;
@@ -576,7 +576,7 @@ document.getElementById('submit-report').addEventListener('click', async () => {
 function showToast(success, msg) {
   const toast = document.getElementById('toast');
   document.getElementById('toast-icon').className = success ? 'ph ph-check-circle' : 'ph ph-warning-circle';
-  document.getElementById('toast-icon').style.color = success ? 'var(--color-low)' : 'var(--color-medium)';
+  document.getElementById('toast-icon').style.color = success ? 'var(--color-cleaned)' : 'var(--color-medium)';
   document.getElementById('toast-msg').textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 4000);
