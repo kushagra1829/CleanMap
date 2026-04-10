@@ -171,6 +171,13 @@ h1, h2, h3 { color: var(--text-main); font-weight: 600; line-height: 1.25; }
 html[data-theme="light"] .theme-icon-light { display: none; }
 html[data-theme="dark"] .theme-icon-dark { display: none; }
 
+.lang-switch {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  color: var(--text-muted); font-size: 0.9rem; font-weight: 500; border-radius: var(--radius-md);
+}
+.lang-switch i { font-size: 1.2rem; }
+.lang-switch:hover { background: var(--bg-hover); color: var(--text-main); }
+
 /* ═════ Main Area ═════ */
 .app-main {
   flex: 1;
@@ -380,9 +387,21 @@ html[data-theme="dark"] .theme-icon-dark { display: none; }
 .dashboard-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .dash-card {
   background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
-  padding: 24px; box-shadow: var(--shadow-sm);
+  padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;
 }
 .dash-card h3 { font-size: 1rem; margin-bottom: 20px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; }
+
+/* Leaderboard */
+.leaderboard-list { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; max-height: 300px; }
+.lb-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px; background: var(--bg-app); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);
+}
+.lb-rank { font-weight: 700; color: var(--text-muted); width: 30px; }
+.lb-name { flex: 1; font-weight: 600; color: var(--text-main); }
+.lb-score { display: flex; gap: 12px; align-items: center; }
+.lb-points { font-weight: 700; color: var(--color-progress); background: rgba(59,130,246,0.1); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
+.lb-count { font-size: 0.8rem; color: var(--text-muted); }
 
 .sev-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .sev-label { width: 70px; font-size: 0.85rem; font-weight: 500; }
@@ -476,6 +495,26 @@ html[data-theme="dark"] .theme-icon-dark { display: none; }
 .popup-desc { font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px; }
 
 .popup-footer { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle); font-size: 0.75rem; color: var(--text-light); }
+
+/* Split Card for Before & After Photos */
+.ba-card { display: flex; gap: 8px; margin-bottom: 12px; }
+.ba-img-wrapper { flex: 1; position: relative; }
+.ba-img { width: 100%; height: 100px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-hover); }
+.ba-label {
+  position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.6); color: #fff;
+  font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;
+}
+
+/* ═════ Modal Overlay ═════ */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5); z-index: 10000;
+  display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);
+}
+.modal-content {
+  background: var(--bg-surface); padding: 32px; border-radius: var(--radius-md);
+  width: 400px; max-width: 90%; box-shadow: var(--shadow-lg); border: 1px solid var(--border-subtle);
+}
 
 /* ═════ Toast ═════ */
 .toast {

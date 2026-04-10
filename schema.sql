@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS reports (
     reporter TEXT DEFAULT 'Anonymous',
     volunteer TEXT,
     photo TEXT,
+    after_photo TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

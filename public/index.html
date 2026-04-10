@@ -49,10 +49,19 @@
       </nav>
 
       <div class="nav-footer">
+        <div class="lang-switch" id="lang-toggle-btn">
+          <i class="ph ph-translate"></i>
+          <select id="lang-select" style="background:transparent; border:none; outline:none; color:inherit; font-family:inherit; cursor:pointer;">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="hi">हिंदी (Hindi)</option>
+          </select>
+        </div>
+
         <div class="theme-switch" id="theme-toggle">
           <i class="ph ph-moon theme-icon-dark"></i>
           <i class="ph ph-sun theme-icon-light"></i>
-          <span>Theme</span>
+          <span data-i18n="theme">Theme</span>
         </div>
       </div>
     </aside>
@@ -131,11 +140,17 @@
 
             <div class="dashboard-columns">
               <div class="dash-card">
-                <h3>Severity Breakdown</h3>
-                <div class="severity-bars" id="severity-bars"></div>
+                <h3 data-i18n="volunteer_leaderboard">Volunteer Leaderboard</h3>
+                <div class="leaderboard-list" id="leaderboard-list">
+                  <!-- Injected via JS -->
+                </div>
               </div>
               <div class="dash-card">
-                <h3>Recent Action Log</h3>
+                <h3 data-i18n="severity_breakdown">Severity Breakdown</h3>
+                <div class="severity-bars" id="severity-bars"></div>
+              </div>
+              <div class="dash-card field-full">
+                <h3 data-i18n="recent_action">Recent Action Log</h3>
                 <div class="activity-feed" id="activity-feed"></div>
               </div>
             </div>
@@ -216,13 +231,32 @@
     </main>
   </div>
 
+  <!-- Proof Modal -->
+  <div class="modal-overlay" id="proof-modal" style="display:none;">
+    <div class="modal-content">
+      <h2 data-i18n="upload_proof_title">Submit Cleanup Proof</h2>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom: 16px;" data-i18n="upload_proof_desc">Please provide an 'After' photo to verify this spot is completely resolved.</p>
+      
+      <div class="form-group">
+        <label data-i18n="after_photo_label">📸 After Photo (Required)</label>
+        <input type="file" id="after-photo" accept="image/*" class="file-input" />
+      </div>
+
+      <div class="form-actions" style="margin-top: 24px; display:flex; gap:12px;">
+        <button class="btn btn-secondary" style="flex:1;" id="close-proof-modal" data-i18n="cancel">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" id="submit-proof-btn" data-i18n="submit_proof">Submit Proof</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast">
     <i id="toast-icon" class="ph ph-check-circle"></i>
     <span id="toast-msg"></span>
   </div>
 
-  <!-- Leaflet & MapLibre JS -->
+  <!-- Supabase & Leaflet JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>

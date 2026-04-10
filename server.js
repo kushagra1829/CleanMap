@@ -25,6 +25,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ── API Endpoints ──
 
+// Deliver public keys to frontend for WebSockets
+app.get('/api/config', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      url: supabaseUrl,
+      key: supabaseKey
+    }
+  });
+});
+
 // GET all reports
 app.get('/api/reports', async (req, res) => {
   const { search } = req.query;
@@ -113,12 +124,41 @@ app.patch('/api/reports/:id/claim', async (req, res) => {
   res.json({ success: true, data });
 });
 
-// PATCH: Mark cleaned
+// PATCH: Mark cleaned (With Before/After photo logic)
 app.patch('/api/reports/:id/clean', async (req, res) => {
   const { id } = req.params;
+  const { afterPhotoBase64 } = req.body;
+
+  let afterPhotoUrl = null;
+
+  if (afterPhotoBase64) {
+    try {
+      const base64Data = afterPhotoBase64.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      const filename = `proof_${Date.now()}_${uuidv4().substring(0,6)}.jpg`;
+
+      const { data: uploadData, error: uploadErr } = await supabase.storage
+        .from('cleanmap-evidence')
+        .upload(filename, buffer, {
+          contentType: 'image/jpeg',
+          upsert: false
+        });
+
+      if (uploadErr) throw uploadErr;
+
+      const { data: publicUrlData } = supabase.storage
+        .from('cleanmap-evidence')
+        .getPublicUrl(filename);
+      
+      afterPhotoUrl = publicUrlData.publicUrl;
+    } catch (err) {
+      console.error('Proof image upload failed:', err.message);
+    }
+  }
+
   const { data, error } = await supabase
     .from('reports')
-    .update({ status: 'cleaned' })
+    .update({ status: 'cleaned', after_photo: afterPhotoUrl })
     .eq('id', id)
     .select()
     .single();
