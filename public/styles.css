@@ -1102,6 +1102,15 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 .popup-loc { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
 .popup-desc { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4; }
 
+.popup-img {
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  border-radius: var(--radius-xs);
+  margin-bottom: 10px;
+  border: 1px solid var(--border-glass);
+}
+
 .popup-badge {
   display: inline-block;
   font-size: 0.63rem;

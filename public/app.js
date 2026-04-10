@@ -216,6 +216,7 @@ mainTileLayer = createTileLayer(mainMap, currentMapStyle);
 L.control.zoom({ position: 'topright' }).addTo(mainMap);
 
 let mainMarkers = {};
+let reportTabMarkers = {}; // Markers for the report tab
 
 function popupContent(r) {
   const sevColors = {
@@ -243,8 +244,10 @@ function popupContent(r) {
   }
 
   const dateStr = new Date(r.created_at || r.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const photoHtml = r.photo ? `<img class="popup-img" src="${r.photo}" alt="Report photo" />` : '';
 
   return `
+    ${photoHtml}
     <div class="popup-title">${r.title}</div>
     <div class="popup-loc">📍 ${r.location}</div>
     <div class="popup-desc">${r.description || 'No description provided.'}</div>
@@ -256,14 +259,29 @@ function popupContent(r) {
 }
 
 function renderMapMarkers() {
+  // Clear both maps
   Object.values(mainMarkers).forEach(m => mainMap.removeLayer(m));
   mainMarkers = {};
 
+  if (typeof reportMap !== 'undefined' && reportMap) {
+    Object.values(reportTabMarkers).forEach(m => reportMap.removeLayer(m));
+    reportTabMarkers = {};
+  }
+
   reports.forEach(r => {
-    const marker = L.marker([r.lat, r.lng], { icon: createIcon(r) })
+    // Add to main map
+    const mainMarker = L.marker([r.lat, r.lng], { icon: createIcon(r) })
       .bindPopup(popupContent(r), { maxWidth: 320, className: 'custom-popup' })
       .addTo(mainMap);
-    mainMarkers[r.id] = marker;
+    mainMarkers[r.id] = mainMarker;
+
+    // Add to report map (if loaded)
+    if (typeof reportMap !== 'undefined' && reportMap) {
+      const rmMarker = L.marker([r.lat, r.lng], { icon: createIcon(r), opacity: 0.7 })
+        .bindPopup(popupContent(r), { maxWidth: 320, className: 'custom-popup' })
+        .addTo(reportMap);
+      reportTabMarkers[r.id] = rmMarker;
+    }
   });
 }
 
@@ -548,11 +566,46 @@ function checkFormValidity() {
 document.getElementById('report-title').addEventListener('input', checkFormValidity);
 document.getElementById('report-location').addEventListener('input', checkFormValidity);
 
+// Image Compression Utility
+function compressImage(file, maxWidth = 800) {
+  return new Promise((resolve) => {
+    if (!file) return resolve(null);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round(height * (maxWidth / width));
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress to 70% JPEG quality
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(dataUrl);
+      };
+    };
+  });
+}
+
 // Submit
 document.getElementById('submit-report').addEventListener('click', async () => {
   const btn = document.getElementById('submit-report');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+  const photoFile = document.getElementById('report-photo').files[0];
+  const photoBase64 = await compressImage(photoFile);
 
   const reportData = {
     title: document.getElementById('report-title').value.trim(),
@@ -561,7 +614,8 @@ document.getElementById('submit-report').addEventListener('click', async () => {
     severity: selectedSeverity,
     lat: reportLatLng.lat,
     lng: reportLatLng.lng,
-    reporter: document.getElementById('report-reporter').value.trim() || 'Anonymous'
+    reporter: document.getElementById('report-reporter').value.trim() || 'Anonymous',
+    photoBase64: photoBase64
   };
 
   const newReport = await createReport(reportData);
@@ -572,6 +626,7 @@ document.getElementById('submit-report').addEventListener('click', async () => {
     document.getElementById('report-location').value = '';
     document.getElementById('report-desc').value = '';
     document.getElementById('report-reporter').value = '';
+    document.getElementById('report-photo').value = '';
     document.querySelectorAll('.sev-option').forEach(o => o.classList.remove('selected'));
     selectedSeverity = null;
     if (reportPin) { reportMap.removeLayer(reportPin); reportPin = null; }

@@ -2,13 +2,20 @@ const express = require('express');
 const Database = require('better-sqlite3');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // ── Middleware ──
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Database Setup ──
@@ -29,10 +36,22 @@ db.exec(`
     lng REAL NOT NULL,
     reporter TEXT NOT NULL DEFAULT 'Anonymous',
     volunteer TEXT DEFAULT NULL,
+    photo TEXT DEFAULT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  -- Try to add the photo column for existing databases (this will fail silently if it already exists, which is fine for sqlite or we can check first)
+  -- SQLite does not have "ADD COLUMN IF NOT EXISTS" natively before 3.32, but better-sqlite3 handles try/catch well.
+`);
+
+try {
+  db.exec('ALTER TABLE reports ADD COLUMN photo TEXT;');
+} catch (e) {
+  // Column likely already exists
+}
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS activity_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     report_id TEXT NOT NULL,
@@ -157,7 +176,7 @@ app.get('/api/reports/:id', (req, res) => {
 // POST create report
 app.post('/api/reports', (req, res) => {
   try {
-    const { title, location, description, severity, lat, lng, reporter } = req.body;
+    const { title, location, description, severity, lat, lng, reporter, photoBase64 } = req.body;
 
     if (!title || !location || !severity || lat == null || lng == null) {
       return res.status(400).json({ success: false, error: 'Missing required fields: title, location, severity, lat, lng' });
@@ -165,11 +184,22 @@ app.post('/api/reports', (req, res) => {
 
     const id = 'r' + Date.now();
     const now = new Date().toISOString();
+    let photoUrl = null;
+
+    if (photoBase64) {
+      // Remove data URL scheme if present
+      const base64Data = photoBase64.replace(/^data:image\/\w+;base64,/, "");
+      const buffer = Buffer.from(base64Data, 'base64');
+      const filename = `${id}.jpg`;
+      const filepath = path.join(uploadsDir, filename);
+      fs.writeFileSync(filepath, buffer);
+      photoUrl = `/uploads/${filename}`;
+    }
 
     db.prepare(`
-      INSERT INTO reports (id, title, location, description, severity, status, lat, lng, reporter, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, 'reported', ?, ?, ?, ?, ?)
-    `).run(id, title, location, description || '', severity, lat, lng, reporter || 'Anonymous', now, now);
+      INSERT INTO reports (id, title, location, description, severity, status, lat, lng, reporter, photo, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, 'reported', ?, ?, ?, ?, ?, ?)
+    `).run(id, title, location, description || '', severity, lat, lng, reporter || 'Anonymous', photoUrl, now, now);
 
     db.prepare(`
       INSERT INTO activity_log (report_id, action, actor, details) VALUES (?, 'created', ?, ?)
