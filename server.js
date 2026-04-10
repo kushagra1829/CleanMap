@@ -13,10 +13,12 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.warn("⚠️ WARNING: SUPABASE_URL or SUPABASE_KEY is missing from environment variables.");
+  console.error("❌ ERROR: SUPABASE_URL or SUPABASE_KEY is missing from environment variables.");
 }
 
-const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder-key');
+const supabase = (supabaseUrl && supabaseKey) 
+  ? createClient(supabaseUrl, supabaseKey)
+  : null;
 
 // ── Middleware ──
 app.use(cors());
@@ -25,8 +27,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ── API Endpoints ──
 
+// Health check for Vercel debugging
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    supabase_configured: !!supabase,
+    env: process.env.NODE_ENV
+  });
+});
+
 // Deliver public keys to frontend for WebSockets
 app.get('/api/config', (req, res) => {
+  if (!supabaseUrl || !supabaseKey) {
+    return res.status(500).json({ success: false, error: "Supabase keys missing in Vercel" });
+  }
   res.json({
     success: true,
     data: {
