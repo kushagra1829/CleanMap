@@ -30,21 +30,21 @@
     <aside class="app-nav">
       <div class="brand">
         <i class="ph-fill ph-plant brand-icon"></i>
-        <span>CleanMap</span>
+        <span data-i18n="brand_name">CleanMap</span>
       </div>
 
       <nav class="nav-links">
         <button class="nav-item active" data-panel="map">
           <i class="ph ph-map-trifold"></i>
-          <span>Global Map</span>
+          <span data-i18n="global_map">Global Map</span>
         </button>
         <button class="nav-item" data-panel="dashboard">
           <i class="ph ph-chart-line-up"></i>
-          <span>Dashboard</span>
+          <span data-i18n="dashboard">Dashboard</span>
         </button>
         <button class="nav-item" data-panel="report">
           <i class="ph ph-plus-circle"></i>
-          <span>New Report</span>
+          <span data-i18n="new_report">New Report</span>
         </button>
       </nav>
 
@@ -53,7 +53,6 @@
           <i class="ph ph-translate"></i>
           <select id="lang-select" style="background:transparent; border:none; outline:none; color:inherit; font-family:inherit; cursor:pointer;">
             <option value="en">English</option>
-            <option value="es">Español</option>
             <option value="hi">हिंदी (Hindi)</option>
           </select>
         </div>
@@ -79,9 +78,9 @@
         
         <div class="header-controls">
           <div class="map-style-switcher">
-            <button class="style-btn active" data-style="liberty" title="Standard">Standard</button>
-            <button class="style-btn" data-style="bright" title="Bright">Bright</button>
-            <button class="style-btn" data-style="positron" title="Minimal">Minimal</button>
+            <button class="style-btn active" data-style="liberty" data-i18n="style_standard">Standard</button>
+            <button class="style-btn" data-style="bright" data-i18n="style_bright">Bright</button>
+            <button class="style-btn" data-style="positron" data-i18n="style_minimal">Minimal</button>
           </div>
         </div>
       </header>
@@ -95,25 +94,25 @@
             <div id="map"></div>
             
             <div class="map-legend">
-              <div class="map-legend-title">Legend</div>
-              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-high)"></span> High Severity</div>
-              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-medium)"></span> Medium Severity</div>
-              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-low)"></span> Low Severity</div>
-              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-progress)"></span> In Progress</div>
-              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-cleaned)"></span> Resolved</div>
+              <div class="map-legend-title" data-i18n="legend">Legend</div>
+              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-high)"></span> <span data-i18n="sev_high">High Severity</span></div>
+              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-medium)"></span> <span data-i18n="sev_medium">Medium Severity</span></div>
+              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-low)"></span> <span data-i18n="sev_low">Low Severity</span></div>
+              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-progress)"></span> <span data-i18n="in_progress">In Progress</span></div>
+              <div class="map-legend-item"><span class="map-legend-dot" style="background:var(--color-cleaned)"></span> <span data-i18n="resolved">Resolved</span></div>
             </div>
             
             <div class="reports-sidebar">
               <div class="sidebar-header">
-                <h2>Active Reports</h2>
+                <h2 data-i18n="active_reports">Active Reports</h2>
                 <span class="report-count" id="report-count">0</span>
               </div>
               
               <div class="filter-group">
-                <button class="filter-tab active" data-filter="all">All</button>
-                <button class="filter-tab" data-filter="reported">Pending</button>
-                <button class="filter-tab" data-filter="in-progress">In Progress</button>
-                <button class="filter-tab" data-filter="cleaned">Cleaned</button>
+                <button class="filter-tab active" data-filter="all" data-i18n="all_tab">All</button>
+                <button class="filter-tab" data-filter="reported" data-i18n="pending_tab">Pending</button>
+                <button class="filter-tab" data-filter="in-progress" data-i18n="in_progress_tab">In Progress</button>
+                <button class="filter-tab" data-filter="cleaned" data-i18n="cleaned_tab">Cleaned</button>
               </div>
               
               <div class="reports-list" id="reports-list">
@@ -128,11 +127,11 @@
           <div class="dashboard-layout">
             <div class="dash-hero">
               <div>
-                <h1 class="page-title">Platform Statistics</h1>
-                <p class="page-subtitle">Real-time overview of community activity</p>
+                <h1 class="page-title" data-i18n="platform_stats">Platform Statistics</h1>
+                <p class="page-subtitle" data-i18n="platform_subs">Real-time overview of community activity</p>
               </div>
               <button class="btn btn-secondary" id="refresh-dashboard">
-                <i class="ph ph-arrows-clockwise"></i> Refresh Sync
+                <i class="ph ph-arrows-clockwise"></i> <span data-i18n="refresh_sync">Refresh Sync</span>
               </button>
             </div>
 
@@ -161,54 +160,54 @@
         <section class="panel" id="panel-report">
           <div class="report-layout">
             <div class="report-form-card">
-              <h1 class="page-title">File strong report</h1>
-              <p class="page-subtitle">Pinpoint a location and add details.</p>
+              <h1 class="page-title" data-i18n="file_report">File strong report</h1>
+              <p class="page-subtitle" data-i18n="file_report_sub">Pinpoint a location and add details.</p>
 
               <div class="form-grid">
                 <div class="form-group field-full">
-                  <label>Map Location Reference</label>
+                  <label data-i18n="map_loc_ref">Map Location Reference</label>
                   <div class="location-pin-box" id="pin-indicator">
                     <i class="ph ph-map-pin"></i>
-                    <span>Click on map to register coordinates</span>
-                    <button class="btn-text" id="geo-btn">Use GPS</button>
+                    <span data-i18n="click_map_coords">Click on map to register coordinates</span>
+                    <button class="btn-text" id="geo-btn" data-i18n="use_gps">Use GPS</button>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="report-title">Brief Title</label>
+                  <label for="report-title" data-i18n="brief_title">Brief Title</label>
                   <input type="text" id="report-title" placeholder="e.g. Broken glass on sidewalk" />
                 </div>
 
                 <div class="form-group">
-                  <label for="report-location">Landmark / Street</label>
+                  <label for="report-location" data-i18n="landmark">Landmark / Street</label>
                   <input type="text" id="report-location" placeholder="e.g. Corner of 5th Ave" />
                 </div>
 
                 <div class="form-group field-full">
-                  <label for="report-desc">Detailed Description</label>
+                  <label for="report-desc" data-i18n="detailed_desc">Detailed Description</label>
                   <textarea id="report-desc" rows="3" placeholder="Volume, type, hazards..."></textarea>
                 </div>
 
                 <div class="form-group">
-                  <label for="report-reporter">Your Initials/Name</label>
+                  <label for="report-reporter" data-i18n="your_name">Your Initials/Name</label>
                   <input type="text" id="report-reporter" placeholder="John D." />
                 </div>
 
                 <div class="form-group">
-                  <label for="report-photo">Evidence Image</label>
+                  <label for="report-photo" data-i18n="evidence_image">Evidence Image</label>
                   <input type="file" id="report-photo" accept="image/*" class="file-input" />
                 </div>
 
                 <div class="form-group field-full">
-                  <label>Severity Classification</label>
+                  <label data-i18n="severity_class">Severity Classification</label>
                   <div class="severity-chooser">
-                    <button class="sev-opt" data-sev="low">
+                    <button class="sev-opt" data-sev="low" data-i18n="low">
                       <span class="dot low"></span> Low
                     </button>
-                    <button class="sev-opt" data-sev="medium">
+                    <button class="sev-opt" data-sev="medium" data-i18n="medium">
                       <span class="dot medium"></span> Medium
                     </button>
-                    <button class="sev-opt" data-sev="high">
+                    <button class="sev-opt" data-sev="high" data-i18n="high">
                       <span class="dot high"></span> High
                     </button>
                   </div>
@@ -216,13 +215,13 @@
               </div>
 
               <div class="form-actions">
-                <button class="btn btn-primary btn-block" id="submit-report" disabled>Submit into System</button>
+                <button class="btn btn-primary btn-block" id="submit-report" disabled data-i18n="submit_system">Submit into System</button>
               </div>
             </div>
             
             <div class="form-map-container">
                <div id="report-map"></div>
-               <div class="form-map-overlay">Click to override pin</div>
+               <div class="form-map-overlay" data-i18n="click_override">Click to override pin</div>
             </div>
           </div>
         </section>

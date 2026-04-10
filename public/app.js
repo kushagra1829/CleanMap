@@ -34,24 +34,18 @@ const translations = {
     landmark: "Landmark / Street", detailed_desc: "Detailed Description",
     your_name: "Your Initials/Name", evidence_image: "Evidence Image (Before)",
     severity_class: "Severity Classification", submit_system: "Submit into System",
-    legend: "Legend"
-  },
-  es: {
-    theme: "Tema", volunteer_leaderboard: "Tabla de Voluntarios",
-    severity_breakdown: "Desglose de Severidad", recent_action: "Registro Reciente",
-    upload_proof_title: "Subir Prueba",
-    upload_proof_desc: "Proporcione una foto del 'Después' para verificar que este lugar está resuelto.",
-    after_photo_label: "📸 Foto del Después (Obligatorio)", cancel: "Cancelar", submit_proof: "Subir Prueba",
-    global_map: "Mapa Global", dashboard: "Panel", new_report: "Nuevo Reporte",
-    active_reports: "Reportes Activos", all_tab: "Todos", pending_tab: "Pendiente",
-    in_progress_tab: "En Progreso", cleaned_tab: "Limpiado",
-    platform_stats: "Estadísticas de la Plataforma", platform_subs: "Resumen en tiempo real de la comunidad",
-    file_report: "Registrar reporte", file_report_sub: "Señala una ubicación y añade detalles.",
-    map_loc_ref: "Referencia de Ubicación en el Mapa", brief_title: "Título Breve",
-    landmark: "Punto de Referencia / Calle", detailed_desc: "Descripción Detallada",
-    your_name: "Tus Iniciales/Nombre", evidence_image: "Imagen de Evidencia (Antes)",
-    severity_class: "Clasificación de Severidad", submit_system: "Enviar al Sistema",
-    legend: "Leyenda"
+    legend: "Legend", brand_name: "CleanMap", style_standard: "Standard",
+    style_bright: "Bright", style_minimal: "Minimal", sev_high: "High Severity",
+    sev_medium: "Medium Severity", sev_low: "Low Severity", in_progress: "In Progress",
+    resolved: "Resolved", refresh_sync: "Refresh Sync", 
+    click_map_coords: "Click on map to register coordinates", use_gps: "Use GPS",
+    low: "Low", medium: "Medium", high: "High", click_override: "Click to override pin",
+    claim_task: "Claim Task", upload_proof_btn: "Upload Proof & Clean",
+    filed_by: "Filed by", on: "on", clean_confirmed: "Cleanup confirmed",
+    new_report_filed: "New Report filed", total_logs: "Total Logs", 
+    pending_action: "Pending Action", no_activity: "No activity.",
+    enter_vol_name: "Enter your Volunteer Name:", proof_accepted: "Proof accepted! Spot marked Cleaned.",
+    demo_label: "(Demo)"
   },
   hi: {
     theme: "थीम", volunteer_leaderboard: "स्वयंसेवक लीडरबोर्ड",
@@ -59,7 +53,7 @@ const translations = {
     upload_proof_title: "प्रमाण अपलोड करें",
     upload_proof_desc: "यह सत्यापित करने के लिए कि यह स्थान पूरी तरह से साफ हो गया है, कृपया एक 'बाद' की फोटो दें।",
     after_photo_label: "📸 बाद की फोटो (आवश्यक)", cancel: "रद्द करें", submit_proof: "प्रमाण जमा करें",
-    global_map: "वैश्विक मानचित्र", dashboard: "डैशबोर्ड", new_report: "नया रिपोर्ट",
+    global_map: "वैश्विक मानचित्र", dashboard: "डैशबोर्ड", new_report: "नई रिपोर्ट",
     active_reports: "सक्रिय रिपोर्ट", all_tab: "सभी", pending_tab: "लंबित",
     in_progress_tab: "प्रगति पर", cleaned_tab: "साफ किया",
     platform_stats: "प्लेटफ़ॉर्म आँकड़े", platform_subs: "समुदाय की गतिविधि का रीयल-टाइम अवलोकन",
@@ -68,7 +62,18 @@ const translations = {
     landmark: "लैंडमार्क / सड़क", detailed_desc: "विस्तृत विवरण",
     your_name: "आपका नाम/प्रारंभिक", evidence_image: "साक्ष्य छवि (पहले)",
     severity_class: "गंभीरता वर्गीकरण", submit_system: "सिस्टम में सबमिट करें",
-    legend: "संकेतकों"
+    legend: "संकेतकों", brand_name: "क्लीनमैप", style_standard: "मानक",
+    style_bright: "चमकीला", style_minimal: "न्यूनतम", sev_high: "उच्च गंभीरता",
+    sev_medium: "मध्यम गंभीरता", sev_low: "कम गंभीरता", in_progress: "प्रगति पर",
+    resolved: "सुलझाया गया", refresh_sync: "सिंक ताज़ा करें",
+    click_map_coords: "निर्देशांक दर्ज करने के लिए मानचित्र पर क्लिक करें", use_gps: "जीपीएस का उपयोग करें",
+    low: "कम", medium: "मध्यम", high: "उच्च", click_override: "पिन को ओवरराइड करने के लिए क्लिक करें",
+    claim_task: "कार्य का दावा करें", upload_proof_btn: "प्रमाण अपलोड करें और साफ करें",
+    filed_by: "द्वारा दायर", on: "को", clean_confirmed: "सफाई की पुष्टि की गई",
+    new_report_filed: "नई रिपोर्ट दर्ज की गई", total_logs: "कुल लॉग", 
+    pending_action: "लंबित कार्रवाई", no_activity: "कोई गतिविधि नहीं।",
+    enter_vol_name: "अपना स्वयंसेवक नाम दर्ज करें:", proof_accepted: "प्रमाण स्वीकार किया गया! स्थान को साफ चिह्नित किया गया।",
+    demo_label: "(डेमो)"
   }
 };
 
@@ -208,9 +213,9 @@ function calculateLeaderboard() {
       lbContainer.innerHTML += `
         <div class="lb-row mock">
           <div class="lb-rank">#${idx + 1}</div>
-          <div class="lb-name">${vol.name} <span style="font-size:0.6rem;opacity:0.6;">(Demo)</span></div>
+          <div class="lb-name">${vol.name} <span style="font-size:0.6rem;opacity:0.6;">${translations[currentLang].demo_label}</span></div>
           <div class="lb-score">
-            <span class="lb-count">${vol.count} cleans</span>
+            <span class="lb-count">${vol.count} ${translations[currentLang].cleaned_tab.toLowerCase()}</span>
             <span class="lb-points">${vol.points} PTS</span>
           </div>
         </div>
@@ -225,7 +230,7 @@ function calculateLeaderboard() {
         <div class="lb-rank">#${idx + 1}</div>
         <div class="lb-name">${vol.name}</div>
         <div class="lb-score">
-          <span class="lb-count">${vol.count} cleans</span>
+          <span class="lb-count">${vol.count} ${translations[currentLang].cleaned_tab.toLowerCase()}</span>
           <span class="lb-points">${vol.points} PTS</span>
         </div>
       </div>
@@ -302,10 +307,11 @@ function popupContent(r) {
   const dateStr = new Date(r.created_at || r.date).toLocaleDateString();
   
   let actions = '';
+  const t = translations[currentLang];
   if (r.status === 'reported') {
-    actions = `<button class="btn btn-primary btn-block" style="margin-top:12px;" onclick="claimReport('${r.id}')"><i class="ph ph-handshake"></i> Claim Task</button>`;
+    actions = `<button class="btn btn-primary btn-block" style="margin-top:12px;" onclick="claimReport('${r.id}')"><i class="ph ph-handshake"></i> ${t.claim_task}</button>`;
   } else if (r.status === 'in-progress') {
-    actions = `<button class="btn btn-secondary btn-block" style="margin-top:12px;" onclick="triggerProofModal('${r.id}')"><i class="ph ph-camera-plus"></i> Upload Proof & Clean</button>`;
+    actions = `<button class="btn btn-secondary btn-block" style="margin-top:12px;" onclick="triggerProofModal('${r.id}')"><i class="ph ph-camera-plus"></i> ${t.upload_proof_btn}</button>`;
   }
 
   let volHtml = '';
@@ -314,17 +320,20 @@ function popupContent(r) {
     volHtml = `<br/><span style="color:var(--color-progress);font-weight:600;">👤 ${r.volunteer} <span style="font-size:0.75rem;background:rgba(59,130,246,0.1);padding:1px 4px;border-radius:4px;">(${pts} pts)</span></span>`;
   }
 
+  const sevLabel = t[r.severity] || r.severity;
+  const statusLabel = t[`${r.status}_tab`] || r.status;
+
   return `
     ${photoHtml}
     <div class="popup-title">${r.title}</div>
     <div class="popup-loc"><i class="ph ph-map-pin"></i> ${r.location}</div>
     <div class="popup-desc">${r.description || 'No description provided.'}</div>
     <div>
-      <span class="badge sev-${r.severity}"><span class="badge-dot"></span> ${r.severity}</span>
-      <span class="status-pill ${r.status}" style="float:right;">${r.status.replace('-', ' ')}</span>
+      <span class="badge sev-${r.severity}"><span class="badge-dot"></span> ${sevLabel}</span>
+      <span class="status-pill ${r.status}" style="float:right;">${statusLabel}</span>
     </div>
     ${actions}
-    <div class="popup-footer">Filed by ${r.reporter} on ${dateStr}${volHtml}</div>
+    <div class="popup-footer">${t.filed_by} ${r.reporter} ${t.on} ${dateStr}${volHtml}</div>
   `;
 }
 
@@ -354,7 +363,7 @@ function renderMapMarkers() {
 // API INTERACTIONS (Claims & Clean)
 // ═══════════════════════════════════════════
 window.claimReport = async function(id) {
-  const volName = prompt("Enter your Volunteer Name:", "John D.");
+  const volName = prompt(translations[currentLang].enter_vol_name, "John D.");
   if (!volName) return;
   try {
     const res = await fetch(`${API_BASE}/reports/${id}/claim`, {
@@ -362,7 +371,7 @@ window.claimReport = async function(id) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ volunteer: volName.trim() })
     });
-    if ((await res.json()).success) showToast(true, 'Task assigned to you! Resolving in background...');
+    if ((await res.json()).success) showToast(true, translations[currentLang].in_progress_tab + '...');
   } catch(e) {}
 };
 
@@ -401,7 +410,7 @@ document.getElementById('submit-proof-btn').addEventListener('click', async () =
     });
     const data = await res.json();
     if (data.success) {
-      showToast(true, 'Proof accepted! Spot marked Cleaned.');
+      showToast(true, translations[currentLang].proof_accepted);
       document.getElementById('close-proof-modal').click();
       refreshAllQuietly();
     } else {
@@ -435,24 +444,28 @@ function renderReportCards() {
     });
 
     const dateStr = new Date(r.created_at || r.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    const t = translations[currentLang];
     
     let btnHtml = '';
     if (r.status === 'reported') {
-      btnHtml = `<button class="btn btn-primary btn-action" onclick="event.stopPropagation(); window.claimReport('${r.id}')">Claim Task</button>`;
+      btnHtml = `<button class="btn btn-primary btn-action" onclick="event.stopPropagation(); window.claimReport('${r.id}')">${t.claim_task}</button>`;
     } else if (r.status === 'in-progress') {
-      btnHtml = `<button class="btn btn-secondary btn-action" onclick="event.stopPropagation(); window.triggerProofModal('${r.id}')">Upload Proof</button>`;
+      btnHtml = `<button class="btn btn-secondary btn-action" onclick="event.stopPropagation(); window.triggerProofModal('${r.id}')">${t.upload_proof_btn}</button>`;
     }
+
+    const sevLabel = t[r.severity] || r.severity;
+    const statusLabel = t[`${r.status}_tab`] || r.status;
 
     card.innerHTML = `
       <div class="card-top">
         <div class="card-title">${r.title}</div>
-        <div class="badge sev-${r.severity}"><span class="badge-dot"></span>${r.severity}</div>
+        <div class="badge sev-${r.severity}"><span class="badge-dot"></span>${sevLabel}</div>
       </div>
       <div class="card-loc"><i class="ph ph-map-pin-line"></i> ${r.location}</div>
       <div class="card-meta">
         <span class="status-pill ${r.status}">
           <i class="ph ${r.status === 'cleaned' ? 'ph-check-circle' : 'ph-clock'}"></i>
-          ${r.status.replace('-',' ')}
+          ${statusLabel}
         </span>
         <span class="card-date">${dateStr}</span>
       </div>
@@ -504,35 +517,37 @@ async function renderDashboard() {
   const { total, reported, inProgress, cleaned, severity, recentActivity } = stats.data;
   const pct = (n) => total > 0 ? ((n / total) * 100).toFixed(1) : 0;
 
+  const t = translations[currentLang];
   document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-title">Total Logs</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--color-medium)">${reported}</div><div class="stat-title">Pending Action</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--color-progress)">${inProgress}</div><div class="stat-title">In Progress</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--color-cleaned)">${cleaned}</div><div class="stat-title">Resolved</div></div>
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-title">${t.total_logs}</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--color-medium)">${reported}</div><div class="stat-title">${t.pending_action}</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--color-progress)">${inProgress}</div><div class="stat-title">${t.in_progress_tab}</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--color-cleaned)">${cleaned}</div><div class="stat-title">${t.resolved}</div></div>
   `;
 
   document.getElementById('severity-bars').innerHTML = `
-    <div class="sev-row"><span class="sev-label">High</span><div class="sev-track"><div class="sev-fill high" style="width:${pct(severity.high)}%"></div></div><span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.high}</span></div>
-    <div class="sev-row"><span class="sev-label">Medium</span><div class="sev-track"><div class="sev-fill medium" style="width:${pct(severity.medium)}%"></div></div><span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.medium}</span></div>
-    <div class="sev-row"><span class="sev-label">Low</span><div class="sev-track"><div class="sev-fill low" style="width:${pct(severity.low)}%"></div></div><span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.low}</span></div>
+    <div class="sev-row"><span class="sev-label">${t.high}</span><div class="sev-track"><div class="sev-fill high" style="width:${pct(severity.high)}%"></div></div><span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.high}</span></div>
+    <div class="sev-row"><span class="sev-label">${t.medium}</span><div class="sev-track"><div class="sev-fill medium" style="width:${pct(severity.medium)}%"></div></div><span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.medium}</span></div>
+    <div class="sev-row"><span class="sev-label">${t.low}</span><div class="sev-track"><div class="sev-fill low" style="width:${pct(severity.low)}%"></div></div><span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.low}</span></div>
   `;
 
   const feed = document.getElementById('activity-feed');
   if (recentActivity && recentActivity.length > 0) {
     feed.innerHTML = recentActivity.map(a => {
       let icon = a.action === 'created' ? 'ph-plus' : (a.action === 'claimed' ? 'ph-handshake' : 'ph-check');
+      const actionLabel = t[`${a.action}_confirmed`] || t[`new_report_filed`] || a.action;
       return `
         <div class="activity-item">
           <div class="act-icon"><i class="ph ${icon}"></i></div>
           <div class="act-body">
             <div class="act-title">${a.report_title}</div>
-            <div class="act-desc">${a.details}</div>
+            <div class="act-desc">${actionLabel}</div>
             <div class="act-time">${new Date(a.created_at).toLocaleString()}</div>
           </div>
         </div>
       `;
     }).join('');
-  } else feed.innerHTML = `<div style="text-align:center; padding: 20px 0; color: var(--text-light);">No activity.</div>`;
+  } else feed.innerHTML = `<div style="text-align:center; padding: 20px 0; color: var(--text-light);">${t.no_activity}</div>`;
 }
 
 document.getElementById('refresh-dashboard').addEventListener('click', renderDashboard);
