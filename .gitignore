@@ -1,0 +1,7 @@
+node_modules/
+wastewatch.db
+wastewatch.db-journal
+wastewatch.db-shm
+wastewatch.db-wal
+.DS_Store
+.env
