@@ -1,6 +1,6 @@
-# WasteWatch 🌿
+# CleanMap 🌿
 
-WasteWatch is a community-driven waste reporting and cleanup tracking application. It allows citizens to flag waste hot-spots via an interactive map, lets volunteers claim the reports, and tracks progress via a central dashboard.
+CleanMap is a community-driven waste reporting and cleanup tracking application. It allows citizens to flag waste hot-spots via an interactive map, lets volunteers claim the reports, and tracks progress via a central dashboard.
 
 ## Features
 

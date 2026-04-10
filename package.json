@@ -1,5 +1,5 @@
 {
-  "name": "waste-watch",
+  "name": "cleanmap",
   "version": "1.0.0",
   "description": "Community waste reporting and cleanup tracking platform",
   "main": "server.js",

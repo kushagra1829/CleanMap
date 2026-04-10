@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════
-// WasteWatch — Frontend Application
+// CleanMap — Frontend Application
 // ═══════════════════════════════════════════
 
 const API_BASE = window.location.origin + '/api';
-const CENTER = [12.8231, 80.0444]; // SRM / Chengalpattu area
+const CENTER = [12.8231, 80.0444];
 
 let reports = [];
 let activeFilter = 'all';
@@ -14,12 +14,12 @@ let currentMapStyle = 'liberty';
 // ═══════════════════════════════════════════
 
 function getStoredTheme() {
-  return localStorage.getItem('wastewatch_theme') || 'dark';
+  return localStorage.getItem('cleanmap_theme') || 'light';
 }
 
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('wastewatch_theme', theme);
+  localStorage.setItem('cleanmap_theme', theme);
 }
 
 function toggleTheme() {
@@ -27,19 +27,17 @@ function toggleTheme() {
   setTheme(current === 'dark' ? 'light' : 'dark');
 }
 
-// Initialize theme
 setTheme(getStoredTheme());
-
 document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
 // ═══════════════════════════════════════════
-// MAP TILE LAYERS (OpenFreeMap via MapLibre GL Leaflet)
+// MAP TILE LAYERS
 // ═══════════════════════════════════════════
 
 const TILE_STYLES = {
-  liberty: 'https://tiles.openfreemap.org/styles/liberty', // Google Maps-like
+  liberty: 'https://tiles.openfreemap.org/styles/liberty',
   bright: 'https://tiles.openfreemap.org/styles/bright',
-  positron: 'https://tiles.openfreemap.org/styles/positron' // Clean/Light
+  positron: 'https://tiles.openfreemap.org/styles/positron'
 };
 
 let mainTileLayer = null;
@@ -48,7 +46,7 @@ let reportTileLayer = null;
 function createTileLayer(map, styleKey) {
   return L.maplibreGL({
     style: TILE_STYLES[styleKey],
-    attribution: '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap</a>'
+    attribution: '<a href="https://openfreemap.org">OpenFreeMap</a>'
   }).addTo(map);
 }
 
@@ -57,17 +55,15 @@ function updateMapTiles() {
     mainMap.removeLayer(mainTileLayer);
     mainTileLayer = createTileLayer(mainMap, currentMapStyle);
   }
-
   if (reportTileLayer && reportMap) {
     reportMap.removeLayer(reportTileLayer);
     reportTileLayer = createTileLayer(reportMap, currentMapStyle);
   }
 }
 
-// Map style switcher
-document.querySelectorAll('.map-style-btn').forEach(btn => {
+document.querySelectorAll('.style-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.map-style-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentMapStyle = btn.dataset.style;
     updateMapTiles();
@@ -87,12 +83,11 @@ async function fetchReports(params = {}) {
       reports = data.data;
       return reports;
     }
-    throw new Error(data.error);
   } catch (err) {
-    console.error('Failed to fetch reports:', err);
-    showToast('⚠️', 'Failed to load reports from server');
-    return [];
+    console.error(err);
+    showToast(false, 'Failed to connect to server.');
   }
+  return [];
 }
 
 async function createReport(reportData) {
@@ -104,12 +99,10 @@ async function createReport(reportData) {
     });
     const data = await res.json();
     if (data.success) return data.data;
-    throw new Error(data.error);
   } catch (err) {
-    console.error('Failed to create report:', err);
-    showToast('⚠️', 'Failed to submit report');
-    return null;
+    showToast(false, 'Submission failed');
   }
+  return null;
 }
 
 async function claimReport(id) {
@@ -121,16 +114,10 @@ async function claimReport(id) {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('🤝', `Claimed "${data.data.title}" — you're a hero!`);
+      showToast(true, 'Task assigned to you.');
       await refreshAll();
-      return data.data;
     }
-    throw new Error(data.error);
-  } catch (err) {
-    console.error('Failed to claim report:', err);
-    showToast('⚠️', 'Failed to claim report');
-    return null;
-  }
+  } catch (err) {}
 }
 
 async function markCleaned(id) {
@@ -141,16 +128,10 @@ async function markCleaned(id) {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('🎉', `"${data.data.title}" marked as cleaned!`);
+      showToast(true, 'Marked as resolved.');
       await refreshAll();
-      return data.data;
     }
-    throw new Error(data.error);
-  } catch (err) {
-    console.error('Failed to mark cleaned:', err);
-    showToast('⚠️', 'Failed to update report');
-    return null;
-  }
+  } catch (err) {}
 }
 
 async function fetchStats() {
@@ -158,14 +139,10 @@ async function fetchStats() {
     const res = await fetch(`${API_BASE}/stats`);
     const data = await res.json();
     if (data.success) return data.data;
-    throw new Error(data.error);
-  } catch (err) {
-    console.error('Failed to fetch stats:', err);
-    return null;
-  }
+  } catch (err) {}
+  return null;
 }
 
-// Expose to global for popup buttons
 window.claimReport = claimReport;
 window.markCleaned = markCleaned;
 
@@ -173,7 +150,7 @@ window.markCleaned = markCleaned;
 // NAVIGATION
 // ═══════════════════════════════════════════
 
-const navBtns = document.querySelectorAll('.nav-btn');
+const navBtns = document.querySelectorAll('.nav-item');
 const panels = document.querySelectorAll('.panel');
 
 navBtns.forEach(btn => {
@@ -181,85 +158,73 @@ navBtns.forEach(btn => {
     const target = btn.dataset.panel;
     navBtns.forEach(b => b.classList.remove('active'));
     panels.forEach(p => p.classList.remove('active'));
+    
     btn.classList.add('active');
     document.getElementById(`panel-${target}`).classList.add('active');
 
-    if (target === 'map') { setTimeout(() => mainMap.invalidateSize(), 100); }
-    if (target === 'report') { setTimeout(() => reportMap.invalidateSize(), 100); }
+    if (target === 'map') { setTimeout(() => mainMap.invalidateSize(), 50); }
+    if (target === 'report') { setTimeout(() => reportMap.invalidateSize(), 50); }
     if (target === 'dashboard') { renderDashboard(); }
   });
 });
 
 // ═══════════════════════════════════════════
-// MAP SETUP
+// MAP MARKERS & POPUPS
 // ═══════════════════════════════════════════
 
-function markerClass(report) {
-  if (report.status === 'cleaned') return 'cleaned';
-  if (report.status === 'in-progress') return 'in-progress';
-  return report.severity;
-}
-
-function createIcon(report) {
-  return L.divIcon({
-    className: '',
-    html: `<div class="custom-marker ${markerClass(report)}"></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -32]
-  });
-}
-
-// ── Main Map ──
 const mainMap = L.map('map', { zoomControl: false }).setView(CENTER, 14);
 mainTileLayer = createTileLayer(mainMap, currentMapStyle);
 L.control.zoom({ position: 'topright' }).addTo(mainMap);
 
 let mainMarkers = {};
-let reportTabMarkers = {}; // Markers for the report tab
+let reportTabMarkers = {};
+
+function createIcon(r) {
+  let color = 'var(--color-medium)';
+  if (r.status === 'cleaned') color = 'var(--color-low)';
+  else if (r.status === 'in-progress') color = 'var(--color-progress)';
+  else if (r.severity === 'high') color = 'var(--color-high)';
+  else if (r.severity === 'low') color = 'var(--color-low)';
+
+  return L.divIcon({
+    className: '',
+    html: `<div class="marker-pin" style="color: ${color}"></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -14]
+  });
+}
 
 function popupContent(r) {
-  const sevColors = {
-    high: { bg: 'rgba(239,68,68,0.15)', color: '#ef4444' },
-    medium: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
-    low: { bg: 'rgba(34,197,94,0.15)', color: '#22c55e' }
-  };
-  const statusColors = {
-    cleaned: { bg: 'rgba(34,197,94,0.15)', color: '#22c55e' },
-    'in-progress': { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
-    reported: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' }
-  };
-
-  const sc = sevColors[r.severity];
-  const stc = statusColors[r.status];
-
-  const sevBadge = `<span class="popup-badge" style="background:${sc.bg};color:${sc.color}">${r.severity}</span>`;
-  const statusBadge = `<span class="popup-badge" style="background:${stc.bg};color:${stc.color}">${r.status.replace('-', ' ')}</span>`;
-
+  const photoHtml = r.photo ? `<img class="popup-img" src="${r.photo}" alt="Report photo" />` : '';
+  const dateStr = new Date(r.created_at || r.date).toLocaleDateString();
+  
   let actions = '';
   if (r.status === 'reported') {
-    actions = `<div class="popup-actions"><button class="popup-btn popup-btn-claim" onclick="claimReport('${r.id}')">🤝 Claim for Cleanup</button></div>`;
+    actions = `<button class="btn btn-primary btn-block" style="margin-top:12px;" onclick="claimReport('${r.id}')"><i class="ph ph-handshake"></i> Claim Task</button>`;
   } else if (r.status === 'in-progress') {
-    actions = `<div class="popup-actions"><button class="popup-btn popup-btn-clean" onclick="markCleaned('${r.id}')">✅ Mark Cleaned</button></div>`;
+    actions = `<button class="btn btn-secondary btn-block" style="margin-top:12px;" onclick="markCleaned('${r.id}')"><i class="ph ph-check-circle"></i> Mark Resolved</button>`;
   }
 
-  const dateStr = new Date(r.created_at || r.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-  const photoHtml = r.photo ? `<img class="popup-img" src="${r.photo}" alt="Report photo" />` : '';
+  const volHtml = r.volunteer ? `<br/>Assigned: ${r.volunteer}` : '';
 
   return `
     ${photoHtml}
     <div class="popup-title">${r.title}</div>
-    <div class="popup-loc">📍 ${r.location}</div>
+    <div class="popup-loc"><i class="ph ph-map-pin"></i> ${r.location}</div>
     <div class="popup-desc">${r.description || 'No description provided.'}</div>
-    <div>${sevBadge} ${statusBadge}</div>
-    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;">Reported by ${r.reporter} · ${dateStr}</div>
-    ${r.volunteer ? `<div style="font-size:0.72rem;color:#3b82f6;margin-top:2px;">👤 Volunteer: ${r.volunteer}</div>` : ''}
+    <div>
+      <span class="badge sev-${r.severity}"><span class="badge-dot"></span> ${r.severity}</span>
+      <span class="status-pill ${r.status}" style="float:right;">${r.status.replace('-', ' ')}</span>
+    </div>
     ${actions}
+    <div class="popup-footer">
+      Filed by ${r.reporter} on ${dateStr}${volHtml}
+    </div>
   `;
 }
 
 function renderMapMarkers() {
-  // Clear both maps
   Object.values(mainMarkers).forEach(m => mainMap.removeLayer(m));
   mainMarkers = {};
 
@@ -271,14 +236,14 @@ function renderMapMarkers() {
   reports.forEach(r => {
     // Add to main map
     const mainMarker = L.marker([r.lat, r.lng], { icon: createIcon(r) })
-      .bindPopup(popupContent(r), { maxWidth: 320, className: 'custom-popup' })
+      .bindPopup(popupContent(r), { className: 'custom-popup' })
       .addTo(mainMap);
     mainMarkers[r.id] = mainMarker;
 
     // Add to report map (if loaded)
     if (typeof reportMap !== 'undefined' && reportMap) {
-      const rmMarker = L.marker([r.lat, r.lng], { icon: createIcon(r), opacity: 0.7 })
-        .bindPopup(popupContent(r), { maxWidth: 320, className: 'custom-popup' })
+      const rmMarker = L.marker([r.lat, r.lng], { icon: createIcon(r), opacity: 0.6 })
+        .bindPopup(popupContent(r), { className: 'custom-popup' })
         .addTo(reportMap);
       reportTabMarkers[r.id] = rmMarker;
     }
@@ -286,7 +251,7 @@ function renderMapMarkers() {
 }
 
 // ═══════════════════════════════════════════
-// REPORT CARDS (Sidebar)
+// CARDS LIST (Sidebar)
 // ═══════════════════════════════════════════
 
 function renderReportCards() {
@@ -295,67 +260,56 @@ function renderReportCards() {
 
   const filtered = reports.filter(r => {
     if (activeFilter === 'all') return true;
-    if (['high', 'medium', 'low'].includes(activeFilter)) return r.severity === activeFilter;
     return r.status === activeFilter;
   });
 
   document.getElementById('report-count').textContent = filtered.length;
 
   if (filtered.length === 0) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">📭</div>
-        <div class="empty-state-text">No reports match this filter.</div>
-      </div>
-    `;
+    list.innerHTML = `<div style="text-align:center; padding: 40px 0; color: var(--text-light);">No items to show.</div>`;
     return;
   }
 
   filtered.forEach(r => {
     const card = document.createElement('div');
     card.className = 'report-card';
-    card.dataset.severity = r.severity;
-    card.dataset.status = r.status;
+    card.addEventListener('click', () => {
+      mainMap.flyTo([r.lat, r.lng], 16, { duration: 1 });
+      setTimeout(() => mainMarkers[r.id]?.openPopup(), 600);
+    });
 
-    let actionBtns = '';
+    const dateStr = new Date(r.created_at || r.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    
+    let btnHtml = '';
     if (r.status === 'reported') {
-      actionBtns = `<button class="action-btn btn-claim" onclick="event.stopPropagation(); claimReport('${r.id}')">🤝 Claim Cleanup</button>`;
+      btnHtml = `<button class="btn btn-primary btn-action" onclick="event.stopPropagation(); claimReport('${r.id}')">Claim Task</button>`;
     } else if (r.status === 'in-progress') {
-      actionBtns = `<button class="action-btn btn-clean" onclick="event.stopPropagation(); markCleaned('${r.id}')">✅ Mark Cleaned</button>`;
+      btnHtml = `<button class="btn btn-secondary btn-action" onclick="event.stopPropagation(); markCleaned('${r.id}')">Resolve Target</button>`;
     }
 
-    const dateStr = new Date(r.created_at || r.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-    const statusLabel = r.status === 'in-progress' ? 'In Progress' : r.status.charAt(0).toUpperCase() + r.status.slice(1);
-
     card.innerHTML = `
-      <div class="report-card-top">
-        <div class="report-title">${r.title}</div>
-        <span class="severity-badge ${r.severity}">${r.severity}</span>
+      <div class="card-top">
+        <div class="card-title">${r.title}</div>
+        <div class="badge sev-${r.severity}"><span class="badge-dot"></span>${r.severity}</div>
       </div>
-      <div class="report-location">📍 ${r.location}</div>
-      <div class="report-meta">
+      <div class="card-loc"><i class="ph ph-map-pin-line"></i> ${r.location}</div>
+      <div class="card-meta">
         <span class="status-pill ${r.status}">
-          <span class="status-dot ${r.status}"></span>
-          ${statusLabel}
+          <i class="ph ${r.status === 'cleaned' ? 'ph-check-circle' : 'ph-clock'}"></i>
+          ${r.status.replace('-',' ')}
         </span>
-        <span class="report-date">${dateStr}</span>
+        <span class="card-date">${dateStr}</span>
       </div>
-      ${actionBtns ? `<div class="card-actions">${actionBtns}</div>` : ''}
+      ${btnHtml}
     `;
-
-    card.addEventListener('click', () => {
-      mainMap.flyTo([r.lat, r.lng], 17, { duration: 1.2 });
-      setTimeout(() => mainMarkers[r.id]?.openPopup(), 800);
-    });
 
     list.appendChild(card);
   });
 }
 
-// Filters
-document.querySelectorAll('.filter-chip').forEach(chip => {
+document.querySelectorAll('.filter-tab').forEach(chip => {
   chip.addEventListener('click', () => {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.filter-tab').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
     activeFilter = chip.dataset.filter;
     renderReportCards();
@@ -373,14 +327,11 @@ let searchTimeout = null;
 searchInput.addEventListener('input', () => {
   clearTimeout(searchTimeout);
   const q = searchInput.value.trim();
-  searchClear.style.display = q ? 'flex' : 'none';
+  searchClear.style.display = q ? 'block' : 'none';
 
   searchTimeout = setTimeout(async () => {
-    if (q.length >= 2) {
-      await fetchReports({ search: q });
-    } else {
-      await fetchReports();
-    }
+    if (q.length >= 2) await fetchReports({ search: q });
+    else await fetchReports();
     renderMapMarkers();
     renderReportCards();
   }, 300);
@@ -403,91 +354,75 @@ async function renderDashboard() {
   if (!stats) return;
 
   const { total, reported, inProgress, cleaned, severity, recentActivity } = stats;
-  const pct = (n) => total > 0 ? Math.round((n / total) * 100) : 0;
+  const pct = (n) => total > 0 ? ((n / total) * 100).toFixed(1) : 0;
 
   document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card total">
-      <div class="stat-label">📊 Total Reports</div>
-      <div class="stat-value">${total}</div>
-      <div class="stat-sub">All submitted waste spots</div>
+    <div class="stat-card">
+      <div class="stat-val">${total}</div>
+      <div class="stat-title">Total Logs</div>
     </div>
-    <div class="stat-card reported-stat">
-      <div class="stat-label">⏳ Awaiting Pickup</div>
-      <div class="stat-value">${reported}</div>
-      <div class="stat-sub">${pct(reported)}% of total reports</div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--color-medium)">${reported}</div>
+      <div class="stat-title">Pending Action</div>
     </div>
-    <div class="stat-card progress">
-      <div class="stat-label">🔄 In Progress</div>
-      <div class="stat-value">${inProgress}</div>
-      <div class="stat-sub">${pct(inProgress)}% being cleaned</div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--color-progress)">${inProgress}</div>
+      <div class="stat-title">In Progress</div>
     </div>
-    <div class="stat-card cleaned-stat">
-      <div class="stat-label">✅ Cleaned</div>
-      <div class="stat-value">${cleaned}</div>
-      <div class="stat-sub">${pct(cleaned)}% resolved 🎉</div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--color-low)">${cleaned}</div>
+      <div class="stat-title">Resolved</div>
     </div>
   `;
 
   document.getElementById('severity-bars').innerHTML = `
-    <div class="sev-bar-row">
-      <span class="sev-bar-label" style="color:var(--accent-red)">🔴 High</span>
-      <div class="sev-bar-track"><div class="sev-bar-fill high" style="width:${pct(severity.high)}%"></div></div>
-      <span class="sev-bar-count">${severity.high}</span>
+    <div class="sev-row">
+      <span class="sev-label">High</span>
+      <div class="sev-track"><div class="sev-fill high" style="width:${pct(severity.high)}%"></div></div>
+      <span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.high}</span>
     </div>
-    <div class="sev-bar-row">
-      <span class="sev-bar-label" style="color:var(--accent-orange)">🟠 Medium</span>
-      <div class="sev-bar-track"><div class="sev-bar-fill medium" style="width:${pct(severity.medium)}%"></div></div>
-      <span class="sev-bar-count">${severity.medium}</span>
+    <div class="sev-row">
+      <span class="sev-label">Medium</span>
+      <div class="sev-track"><div class="sev-fill medium" style="width:${pct(severity.medium)}%"></div></div>
+      <span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.medium}</span>
     </div>
-    <div class="sev-bar-row">
-      <span class="sev-bar-label" style="color:var(--accent-green)">🟢 Low</span>
-      <div class="sev-bar-track"><div class="sev-bar-fill low" style="width:${pct(severity.low)}%"></div></div>
-      <span class="sev-bar-count">${severity.low}</span>
+    <div class="sev-row">
+      <span class="sev-label">Low</span>
+      <div class="sev-track"><div class="sev-fill low" style="width:${pct(severity.low)}%"></div></div>
+      <span style="font-size:0.8rem; font-weight:600; width:40px; text-align:right">${severity.low}</span>
     </div>
   `;
 
-  // Activity Feed
-  const activityFeed = document.getElementById('activity-feed');
+  const feed = document.getElementById('activity-feed');
   if (recentActivity && recentActivity.length > 0) {
-    activityFeed.innerHTML = recentActivity.map(a => {
-      const timeAgo = getTimeAgo(new Date(a.created_at));
+    feed.innerHTML = recentActivity.map(a => {
+      let icon = 'ph-info';
+      if (a.action === 'created') icon = 'ph-plus';
+      if (a.action === 'claimed') icon = 'ph-handshake';
+      if (a.action === 'cleaned') icon = 'ph-check';
+      
       return `
         <div class="activity-item">
-          <div class="activity-dot ${a.action}"></div>
-          <div class="activity-content">
-            <div class="activity-title">${a.report_title || 'Unknown Report'}</div>
-            <div class="activity-detail">${a.details}</div>
+          <div class="act-icon"><i class="ph ${icon}"></i></div>
+          <div class="act-body">
+            <div class="act-title">${a.report_title}</div>
+            <div class="act-desc">${a.details}</div>
+            <div class="act-time">${new Date(a.created_at).toLocaleString()}</div>
           </div>
-          <div class="activity-time">${timeAgo}</div>
         </div>
       `;
     }).join('');
   } else {
-    activityFeed.innerHTML = `<div class="empty-state"><div class="empty-state-text">No activity yet</div></div>`;
+    feed.innerHTML = `<div style="text-align:center; padding: 20px 0; color: var(--text-light);">No activity.</div>`;
   }
 }
 
-function getTimeAgo(date) {
-  const now = new Date();
-  const seconds = Math.floor((now - date) / 1000);
-  if (seconds < 60) return 'Just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
-}
-
 document.getElementById('refresh-dashboard').addEventListener('click', function () {
-  this.classList.add('spinning');
-  renderDashboard().then(() => {
-    setTimeout(() => this.classList.remove('spinning'), 600);
-  });
+  renderDashboard();
 });
 
 // ═══════════════════════════════════════════
-// REPORT FORM + MAP
+// REPORT FORM + COMPRESSION
 // ═══════════════════════════════════════════
 
 const reportMap = L.map('report-map', { zoomControl: false }).setView(CENTER, 14);
@@ -501,56 +436,51 @@ let selectedSeverity = null;
 reportMap.on('click', (e) => {
   reportLatLng = e.latlng;
   if (reportPin) reportMap.removeLayer(reportPin);
+  
   reportPin = L.marker(e.latlng, {
     icon: L.divIcon({
       className: '',
-      html: `<div style="width:22px;height:22px;background:var(--accent-blue);border:3px solid white;border-radius:50%;box-shadow:0 2px 12px rgba(59,130,246,0.5);animation:pulse-dot 1.5s infinite;"></div>`,
-      iconSize: [22, 22],
-      iconAnchor: [11, 11]
-    })
+      html: `<div class="marker-pin" style="color: var(--color-progress);"></div>`,
+      iconSize: [24, 24], iconAnchor: [12, 12]
+    }),
+    zIndexOffset: 1000
   }).addTo(reportMap);
 
-  const pinEl = document.getElementById('pin-indicator');
-  pinEl.className = 'pin-indicator has-pin';
-  pinEl.innerHTML = `<span>📌 ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}</span><button class="geo-btn" onclick="useGeolocation()">📡 My Location</button>`;
+  const pinBox = document.getElementById('pin-indicator');
+  pinBox.classList.add('active');
+  pinBox.innerHTML = `<i class="ph-fill ph-map-pin"></i><span>Set to: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}</span>`;
   checkFormValidity();
 });
 
-// Geolocation
 function useGeolocation() {
-  if (!navigator.geolocation) {
-    showToast('⚠️', 'Geolocation not supported in this browser');
-    return;
-  }
+  if (!navigator.geolocation) { showToast(false, 'Geolocation not supported'); return; }
   navigator.geolocation.getCurrentPosition(pos => {
     const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
     reportLatLng = latlng;
     reportMap.flyTo(latlng, 16);
     if (reportPin) reportMap.removeLayer(reportPin);
+    
     reportPin = L.marker(latlng, {
       icon: L.divIcon({
         className: '',
-        html: `<div style="width:22px;height:22px;background:var(--accent-blue);border:3px solid white;border-radius:50%;box-shadow:0 2px 12px rgba(59,130,246,0.5);"></div>`,
-        iconSize: [22, 22],
-        iconAnchor: [11, 11]
-      })
+        html: `<div class="marker-pin" style="color: var(--color-progress);"></div>`,
+        iconSize: [24, 24], iconAnchor: [12, 12]
+      }),
+      zIndexOffset: 1000
     }).addTo(reportMap);
-    const pinEl = document.getElementById('pin-indicator');
-    pinEl.className = 'pin-indicator has-pin';
-    pinEl.innerHTML = `<span>📌 ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)} (GPS)</span>`;
+    
+    const pinBox = document.getElementById('pin-indicator');
+    pinBox.classList.add('active');
+    pinBox.innerHTML = `<i class="ph-fill ph-crosshair"></i><span>GPS Lock: ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}</span>`;
     checkFormValidity();
-  }, () => {
-    showToast('⚠️', 'Could not get your location');
   });
 }
-window.useGeolocation = useGeolocation;
 
 document.getElementById('geo-btn').addEventListener('click', useGeolocation);
 
-// Severity selector
-document.querySelectorAll('.sev-option').forEach(opt => {
+document.querySelectorAll('.sev-opt').forEach(opt => {
   opt.addEventListener('click', () => {
-    document.querySelectorAll('.sev-option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.sev-opt').forEach(o => o.classList.remove('selected'));
     opt.classList.add('selected');
     selectedSeverity = opt.dataset.sev;
     checkFormValidity();
@@ -566,7 +496,6 @@ function checkFormValidity() {
 document.getElementById('report-title').addEventListener('input', checkFormValidity);
 document.getElementById('report-location').addEventListener('input', checkFormValidity);
 
-// Image Compression Utility
 function compressImage(file, maxWidth = 800) {
   return new Promise((resolve) => {
     if (!file) return resolve(null);
@@ -579,30 +508,24 @@ function compressImage(file, maxWidth = 800) {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-
         if (width > maxWidth) {
           height = Math.round(height * (maxWidth / width));
           width = maxWidth;
         }
-
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress to 70% JPEG quality
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        resolve(dataUrl);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
     };
   });
 }
 
-// Submit
 document.getElementById('submit-report').addEventListener('click', async () => {
   const btn = document.getElementById('submit-report');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Submitting...';
+  btn.textContent = 'Processing...';
 
   const photoFile = document.getElementById('report-photo').files[0];
   const photoBase64 = await compressImage(photoFile);
@@ -621,51 +544,43 @@ document.getElementById('submit-report').addEventListener('click', async () => {
   const newReport = await createReport(reportData);
 
   if (newReport) {
-    // Reset form
     document.getElementById('report-title').value = '';
     document.getElementById('report-location').value = '';
     document.getElementById('report-desc').value = '';
     document.getElementById('report-reporter').value = '';
     document.getElementById('report-photo').value = '';
-    document.querySelectorAll('.sev-option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.sev-opt').forEach(o => o.classList.remove('selected'));
     selectedSeverity = null;
     if (reportPin) { reportMap.removeLayer(reportPin); reportPin = null; }
     reportLatLng = null;
-    const pinEl = document.getElementById('pin-indicator');
-    pinEl.className = 'pin-indicator';
-    pinEl.innerHTML = `<span>👆 Click on the map to place a pin</span><button class="geo-btn" id="geo-btn" onclick="useGeolocation()">📡 My Location</button>`;
+    
+    document.getElementById('pin-indicator').classList.remove('active');
+    document.getElementById('pin-indicator').innerHTML = `<i class="ph ph-map-pin"></i><span>Click on map to register coordinates</span><button class="btn-text" id="geo-btn">Use GPS</button>`;
+    document.getElementById('geo-btn').addEventListener('click', useGeolocation);
 
-    showToast('✅', `Report "${newReport.title}" submitted!`);
+    showToast(true, 'File recorded to global system.');
 
-    // Switch to map and fly to new report
     document.querySelector('[data-panel="map"]').click();
     await refreshAll();
     setTimeout(() => {
-      mainMap.flyTo([newReport.lat, newReport.lng], 17, { duration: 1.2 });
-      setTimeout(() => mainMarkers[newReport.id]?.openPopup(), 800);
+      mainMap.flyTo([newReport.lat, newReport.lng], 16, { duration: 1 });
+      setTimeout(() => mainMarkers[newReport.id]?.openPopup(), 600);
     }, 300);
   }
 
   btn.disabled = false;
-  btn.innerHTML = '🚀 Submit Report';
+  btn.textContent = 'Submit into System';
   checkFormValidity();
 });
 
-// ═══════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════
-
-function showToast(icon, msg) {
+function showToast(success, msg) {
   const toast = document.getElementById('toast');
-  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-icon').className = success ? 'ph ph-check-circle' : 'ph ph-warning-circle';
+  document.getElementById('toast-icon').style.color = success ? 'var(--color-low)' : 'var(--color-medium)';
   document.getElementById('toast-msg').textContent = msg;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3500);
+  setTimeout(() => toast.classList.remove('show'), 4000);
 }
-
-// ═══════════════════════════════════════════
-// REFRESH ALL
-// ═══════════════════════════════════════════
 
 async function refreshAll() {
   await fetchReports();
@@ -673,16 +588,9 @@ async function refreshAll() {
   renderReportCards();
 }
 
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-
 (async function init() {
-  // Load reports from backend
   await fetchReports();
   renderMapMarkers();
   renderReportCards();
-
-  // Fix map sizes
-  setTimeout(() => mainMap.invalidateSize(), 200);
+  setTimeout(() => mainMap.invalidateSize(), 150);
 })();

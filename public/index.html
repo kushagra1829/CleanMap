@@ -1,218 +1,222 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WasteWatch — Community Waste Reporting</title>
-  <meta name="description" content="Report, track, and clean up waste spots in your community with WasteWatch.">
+  <title>CleanMap — Community Platform</title>
+  <meta name="description" content="Report, track, and clean up waste spots in your community with CleanMap.">
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- MapLibre GL -->
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
-  <!-- Google Fonts -->
+  
+  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- ═══ HEADER ═══ -->
-  <header id="app-header">
-    <div class="logo">
-      <div class="logo-icon">🌿</div>
-      <span class="logo-text">WasteWatch</span>
-    </div>
-
-    <nav id="main-nav">
-      <button class="nav-btn active" data-panel="map" id="nav-map">
-        <span class="nav-emoji">🗺️</span>
-        <span class="nav-label-full">Map</span>
-      </button>
-      <button class="nav-btn" data-panel="dashboard" id="nav-dashboard">
-        <span class="nav-emoji">📊</span>
-        <span class="nav-label-full">Dashboard</span>
-      </button>
-      <button class="nav-btn" data-panel="report" id="nav-report">
-        <span class="nav-emoji">➕</span>
-        <span class="nav-label-full">Report</span>
-      </button>
-    </nav>
-
-    <div class="header-right">
-      <!-- Map Style Switcher -->
-      <div class="map-style-switcher" id="map-style-switcher">
-        <button class="map-style-btn active" data-style="liberty" title="Liberty (Default)">🗺️</button>
-        <button class="map-style-btn" data-style="bright" title="Bright Style">🌍</button>
-        <button class="map-style-btn" data-style="positron" title="Positron (Clean)">🏙️</button>
+  <!-- App Container -->
+  <div class="app-layout">
+    
+    <!-- Sidebar / Global Nav -->
+    <aside class="app-nav">
+      <div class="brand">
+        <i class="ph-fill ph-plant brand-icon"></i>
+        <span>CleanMap</span>
       </div>
 
-      <!-- Theme Toggle -->
-      <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">
-        <span class="theme-icon-light">☀️</span>
-        <span class="theme-icon-dark">🌙</span>
-      </button>
-    </div>
-  </header>
+      <nav class="nav-links">
+        <button class="nav-item active" data-panel="map">
+          <i class="ph ph-map-trifold"></i>
+          <span>Global Map</span>
+        </button>
+        <button class="nav-item" data-panel="dashboard">
+          <i class="ph ph-chart-line-up"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-panel="report">
+          <i class="ph ph-plus-circle"></i>
+          <span>New Report</span>
+        </button>
+      </nav>
 
-  <!-- ═══ MAIN ═══ -->
-  <main>
-    <!-- ═══ MAP PANEL ═══ -->
-    <section class="panel active" id="panel-map">
-      <div id="map-container">
-        <div id="map"></div>
-        <!-- Map overlay controls -->
-        <div class="map-search-bar" id="map-search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="map-search-input" placeholder="Search reports by location or title..." />
-          <button class="search-clear" id="search-clear" style="display:none;">✕</button>
-        </div>
-        <div class="map-legend" id="map-legend">
-          <div class="legend-title">Legend</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> High Severity</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Medium Severity</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#22c55e;"></span> Low Severity</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> In Progress</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#6b7280;"></span> Cleaned</div>
+      <div class="nav-footer">
+        <div class="theme-switch" id="theme-toggle">
+          <i class="ph ph-moon theme-icon-dark"></i>
+          <i class="ph ph-sun theme-icon-light"></i>
+          <span>Theme</span>
         </div>
       </div>
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-          <div class="sidebar-title-row">
-            <h2>📋 Waste Reports</h2>
-            <span class="report-count" id="report-count">0</span>
-          </div>
-          <p>Click a card to zoom in — claim spots for cleanup</p>
-        </div>
-        <div class="sidebar-filters" id="sidebar-filters">
-          <button class="filter-chip active" data-filter="all">All</button>
-          <button class="filter-chip" data-filter="reported">
-            <span class="filter-dot reported-dot"></span> Reported
-          </button>
-          <button class="filter-chip" data-filter="in-progress">
-            <span class="filter-dot progress-dot"></span> In Progress
-          </button>
-          <button class="filter-chip" data-filter="cleaned">
-            <span class="filter-dot cleaned-dot"></span> Cleaned
-          </button>
-          <button class="filter-chip" data-filter="high">🔴 High</button>
-          <button class="filter-chip" data-filter="medium">🟠 Medium</button>
-          <button class="filter-chip" data-filter="low">🟢 Low</button>
-        </div>
-        <div class="reports-list" id="reports-list">
-          <div class="loading-skeleton">
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-          </div>
-        </div>
-      </aside>
-    </section>
+    </aside>
 
-    <!-- ═══ DASHBOARD PANEL ═══ -->
-    <section class="panel" id="panel-dashboard">
-      <div class="dash-header animate-in">
-        <div class="dash-title-row">
-          <div>
-            <h1>📊 Dashboard</h1>
-            <p>Real-time overview of waste reporting activity</p>
-          </div>
-          <button class="refresh-btn" id="refresh-dashboard" title="Refresh dashboard">🔄</button>
+    <!-- Main Content Area -->
+    <main class="app-main">
+      
+      <!-- Topbar Controls (Shared) -->
+      <header class="app-header">
+        <div class="header-search" id="map-search-bar">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" id="map-search-input" placeholder="Search reports..." />
+          <button id="search-clear" style="display:none;"><i class="ph ph-x"></i></button>
         </div>
+        
+        <div class="header-controls">
+          <div class="map-style-switcher">
+            <button class="style-btn active" data-style="liberty" title="Standard">Standard</button>
+            <button class="style-btn" data-style="bright" title="Bright">Bright</button>
+            <button class="style-btn" data-style="positron" title="Minimal">Minimal</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- PANELS -->
+      <div class="panels-container">
+        
+        <!-- Map Panel -->
+        <section class="panel active" id="panel-map">
+          <div class="map-view">
+            <div id="map"></div>
+            
+            <div class="reports-sidebar">
+              <div class="sidebar-header">
+                <h2>Active Reports</h2>
+                <span class="report-count" id="report-count">0</span>
+              </div>
+              
+              <div class="filter-group">
+                <button class="filter-tab active" data-filter="all">All</button>
+                <button class="filter-tab" data-filter="reported">Pending</button>
+                <button class="filter-tab" data-filter="in-progress">In Progress</button>
+                <button class="filter-tab" data-filter="cleaned">Cleaned</button>
+              </div>
+              
+              <div class="reports-list" id="reports-list">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Dashboard Panel -->
+        <section class="panel" id="panel-dashboard">
+          <div class="dashboard-layout">
+            <div class="dash-hero">
+              <div>
+                <h1 class="page-title">Platform Statistics</h1>
+                <p class="page-subtitle">Real-time overview of community activity</p>
+              </div>
+              <button class="btn btn-secondary" id="refresh-dashboard">
+                <i class="ph ph-arrows-clockwise"></i> Refresh Sync
+              </button>
+            </div>
+
+            <div class="stats-grid" id="stats-grid"></div>
+
+            <div class="dashboard-columns">
+              <div class="dash-card">
+                <h3>Severity Breakdown</h3>
+                <div class="severity-bars" id="severity-bars"></div>
+              </div>
+              <div class="dash-card">
+                <h3>Recent Action Log</h3>
+                <div class="activity-feed" id="activity-feed"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Report Panel -->
+        <section class="panel" id="panel-report">
+          <div class="report-layout">
+            <div class="report-form-card">
+              <h1 class="page-title">File strong report</h1>
+              <p class="page-subtitle">Pinpoint a location and add details.</p>
+
+              <div class="form-grid">
+                <div class="form-group field-full">
+                  <label>Map Location Reference</label>
+                  <div class="location-pin-box" id="pin-indicator">
+                    <i class="ph ph-map-pin"></i>
+                    <span>Click on map to register coordinates</span>
+                    <button class="btn-text" id="geo-btn">Use GPS</button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="report-title">Brief Title</label>
+                  <input type="text" id="report-title" placeholder="e.g. Broken glass on sidewalk" />
+                </div>
+
+                <div class="form-group">
+                  <label for="report-location">Landmark / Street</label>
+                  <input type="text" id="report-location" placeholder="e.g. Corner of 5th Ave" />
+                </div>
+
+                <div class="form-group field-full">
+                  <label for="report-desc">Detailed Description</label>
+                  <textarea id="report-desc" rows="3" placeholder="Volume, type, hazards..."></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="report-reporter">Your Initials/Name</label>
+                  <input type="text" id="report-reporter" placeholder="John D." />
+                </div>
+
+                <div class="form-group">
+                  <label for="report-photo">Evidence Image</label>
+                  <input type="file" id="report-photo" accept="image/*" class="file-input" />
+                </div>
+
+                <div class="form-group field-full">
+                  <label>Severity Classification</label>
+                  <div class="severity-chooser">
+                    <button class="sev-opt" data-sev="low">
+                      <span class="dot low"></span> Low
+                    </button>
+                    <button class="sev-opt" data-sev="medium">
+                      <span class="dot medium"></span> Medium
+                    </button>
+                    <button class="sev-opt" data-sev="high">
+                      <span class="dot high"></span> High
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary btn-block" id="submit-report" disabled>Submit into System</button>
+              </div>
+            </div>
+            
+            <div class="form-map-container">
+               <div id="report-map"></div>
+               <div class="form-map-overlay">Click to override pin</div>
+            </div>
+          </div>
+        </section>
+
       </div>
-
-      <div class="stats-grid" id="stats-grid"></div>
-
-      <div class="dashboard-row">
-        <div class="breakdown-section animate-in">
-          <h3>⚠️ Severity Breakdown</h3>
-          <div class="severity-bars" id="severity-bars"></div>
-        </div>
-        <div class="activity-section animate-in">
-          <h3>📈 Recent Activity</h3>
-          <div class="activity-feed" id="activity-feed"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ REPORT PANEL ═══ -->
-    <section class="panel" id="panel-report">
-      <div class="report-form-container">
-        <h2>📍 Report Waste</h2>
-        <p class="subtitle">Click on the map to drop a pin, then fill out the details</p>
-
-        <div class="form-group">
-          <label class="form-label">📌 Location Pin</label>
-          <div class="pin-indicator" id="pin-indicator">
-            <span>👆 Click on the map to place a pin</span>
-            <button class="geo-btn" id="geo-btn" title="Use my current location">📡 My Location</button>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="report-title">✏️ Title</label>
-          <input class="form-input" id="report-title" type="text" placeholder="e.g., Plastic waste near park entrance" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="report-location">📍 Location Name</label>
-          <input class="form-input" id="report-location" type="text" placeholder="e.g., Near SRM Main Gate" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="report-desc">📝 Description</label>
-          <textarea class="form-input" id="report-desc" placeholder="Describe the waste type and amount..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="report-reporter">👤 Your Name</label>
-          <input class="form-input" id="report-reporter" type="text" placeholder="e.g., John D." />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="report-photo">📸 Photo (Optional)</label>
-          <input class="form-input form-file" id="report-photo" type="file" accept="image/*" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">⚡ Severity Level</label>
-          <div class="severity-selector">
-            <button class="sev-option low" data-sev="low">
-              <span class="sev-icon">🟢</span>
-              <span class="sev-text">Low</span>
-            </button>
-            <button class="sev-option medium" data-sev="medium">
-              <span class="sev-icon">🟠</span>
-              <span class="sev-text">Medium</span>
-            </button>
-            <button class="sev-option high" data-sev="high">
-              <span class="sev-icon">🔴</span>
-              <span class="sev-text">High</span>
-            </button>
-          </div>
-        </div>
-
-        <button class="submit-btn" id="submit-report" disabled>🚀 Submit Report</button>
-      </div>
-      <div id="report-map"></div>
-    </section>
-  </main>
+    </main>
+  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast">
-    <span class="toast-icon" id="toast-icon">✅</span>
+    <i id="toast-icon" class="ph ph-check-circle"></i>
     <span id="toast-msg"></span>
   </div>
 
-  <!-- Leaflet JS -->
+  <!-- Leaflet & MapLibre JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- MapLibre GL JS -->
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <!-- MapLibre GL Leaflet bridge -->
   <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
-
   <script src="app.js"></script>
 </body>
 </html>

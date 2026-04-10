@@ -19,7 +19,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Database Setup ──
-const db = new Database(path.join(__dirname, 'wastewatch.db'));
+const db = new Database(path.join(__dirname, 'cleanmap.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
@@ -322,7 +322,7 @@ app.get('/{*splat}', (req, res) => {
 
 // ── Start Server ──
 app.listen(PORT, () => {
-  console.log(`\n🌿 WasteWatch Server running at http://localhost:${PORT}`);
+  console.log(`\n🌿 CleanMap Server running at http://localhost:${PORT}`);
   console.log(`📊 API available at http://localhost:${PORT}/api/reports`);
   console.log(`📋 Dashboard stats at http://localhost:${PORT}/api/stats\n`);
 });
