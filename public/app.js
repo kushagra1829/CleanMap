@@ -196,7 +196,26 @@ function calculateLeaderboard() {
   lbContainer.innerHTML = '';
   
   if (sortedLeaderboard.length === 0) {
-    lbContainer.innerHTML = `<div style="text-align:center;color:var(--text-light);padding:20px;">No points recorded yet.</div>`;
+    // Inject 5 mock values if the leaderboard is empty (Hackathon Mode)
+    const mockValues = [
+      { name: "EcoWarrior_99", points: 250, count: 5 },
+      { name: "GreenGuardian", points: 180, count: 4 },
+      { name: "CleanCity_Pro", points: 120, count: 2 },
+      { name: "NatureLover", points: 80, count: 3 },
+      { name: "WasteWatcher", points: 50, count: 1 }
+    ];
+    mockValues.forEach((vol, idx) => {
+      lbContainer.innerHTML += `
+        <div class="lb-row mock">
+          <div class="lb-rank">#${idx + 1}</div>
+          <div class="lb-name">${vol.name} <span style="font-size:0.6rem;opacity:0.6;">(Demo)</span></div>
+          <div class="lb-score">
+            <span class="lb-count">${vol.count} cleans</span>
+            <span class="lb-points">${vol.points} PTS</span>
+          </div>
+        </div>
+      `;
+    });
     return;
   }
 
@@ -384,11 +403,12 @@ document.getElementById('submit-proof-btn').addEventListener('click', async () =
     if (data.success) {
       showToast(true, 'Proof accepted! Spot marked Cleaned.');
       document.getElementById('close-proof-modal').click();
+      refreshAllQuietly();
     } else {
-      showToast(false, 'Upload error.');
+      showToast(false, `Upload error: ${data.error || 'Check Supabase Keys'}`);
     }
   } catch(e) {
-    showToast(false, 'Network failure.');
+    showToast(false, 'Network failure or file too large.');
   }
   btn.disabled = false;
   btn.textContent = "Submit Proof";

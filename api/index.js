@@ -79,7 +79,7 @@ app.post('/api/reports', async (req, res) => {
   let photoUrl = null;
 
   // Process and upload base64 image if present
-  if (photoBase64) {
+  if (photoBase64 && supabase) {
     try {
       const base64Data = photoBase64.replace(/^data:image\/\w+;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
@@ -111,6 +111,8 @@ app.post('/api/reports', async (req, res) => {
     photo: photoUrl,
     status: 'reported'
   };
+
+  if (!supabase) return res.status(500).json({ success: false, error: "Database not connected" });
 
   const { data, error } = await supabase
     .from('reports')
@@ -148,7 +150,7 @@ app.patch('/api/reports/:id/clean', async (req, res) => {
 
   let afterPhotoUrl = null;
 
-  if (afterPhotoBase64) {
+  if (afterPhotoBase64 && supabase) {
     try {
       const base64Data = afterPhotoBase64.replace(/^data:image\/\w+;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
@@ -172,6 +174,8 @@ app.patch('/api/reports/:id/clean', async (req, res) => {
       console.error('Proof image upload failed:', err.message);
     }
   }
+
+  if (!supabase) return res.status(500).json({ success: false, error: "Database not connected" });
 
   const { data, error } = await supabase
     .from('reports')
