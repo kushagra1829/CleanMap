@@ -7,9 +7,11 @@ CleanMap is a community-driven waste reporting and cleanup tracking application.
 - **Interactive Maps**: Uses OpenFreeMap and MapLibre GL JS context.
 - **Reporting System**: Allows users to drop a pin on a map or use Geolocation tracking to submit waste spots with descriptions and severity metrics.
 - **Gamified Cleanup**: Volunteers can browse high-priority reports, claim spots for clean-up, and declare them as resolved.Volunteers earn points per cleanup based on severity:
-  Low=10pts,Medium=25pts,High=50pts.
+- Low=10pts,Medium=25pts,High=50pts.
+- The leaderboard shows top volunteers ranked by points.
 - **Real-Time Dashboard**: Monitor cleanup status, activity feeds, and statistics across local reports dynamically.
 - **Beautiful UI**: Modern glassmorphism design with a fully functional Dark/Light mode toggle.
+- **Multi Language Support**: Users can switch language to Hindi. 
 
 ## Tech Stack
 
