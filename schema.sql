@@ -20,9 +20,15 @@ CREATE TABLE IF NOT EXISTS reports (
 );
 
 -- 2. Create the Cloudinary/S3 Equivalent image bucket in Supabase Storage
-insert into storage.buckets (id, name, public) 
-values ('cleanmap-evidence', 'cleanmap-evidence', true);
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('cleanmap-evidence', 'cleanmap-evidence', true)
+ON CONFLICT (id) DO NOTHING;
 
--- 3. Adjust permissions so anyone can read/write directly (since we have no authentication system yet)
-create policy "Public Access" on storage.objects for select using (bucket_id = 'cleanmap-evidence');
-create policy "Public Insert" on storage.objects for insert with check (bucket_id = 'cleanmap-evidence');
+-- 3. Adjust permissions so anyone can read/write directly
+-- Note: Policies cannot use IF NOT EXISTS easily in standard SQL, 
+-- but we can drop and recreate them to ensure they are correct.
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'cleanmap-evidence');
+
+DROP POLICY IF EXISTS "Public Insert" ON storage.objects;
+CREATE POLICY "Public Insert" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'cleanmap-evidence');
