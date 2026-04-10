@@ -1,8 +1,4 @@
--- IMPORTANT FOR THE USER!
--- Paste all of the code below into the SQL Editor (left sidebar "SQL") in your Supabase Dashboard
--- and press RUN to create your database structure and file storage.
-
--- 1. Create the reports table
+-- 1. Create the reports table (Fixed Schema)
 CREATE TABLE IF NOT EXISTS reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
@@ -19,14 +15,19 @@ CREATE TABLE IF NOT EXISTS reports (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Create the Cloudinary/S3 Equivalent image bucket in Supabase Storage
+-- 2. ENABLE REALTIME for this table
+-- This allows the map and leaderboard to update without refreshing
+BEGIN;
+  DROP PUBLICATION IF EXISTS supabase_realtime;
+  CREATE PUBLICATION supabase_realtime FOR TABLE reports;
+COMMIT;
+
+-- 3. Create the image bucket in Supabase Storage
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('cleanmap-evidence', 'cleanmap-evidence', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 3. Adjust permissions so anyone can read/write directly
--- Note: Policies cannot use IF NOT EXISTS easily in standard SQL, 
--- but we can drop and recreate them to ensure they are correct.
+-- 4. Adjust permissions for storage
 DROP POLICY IF EXISTS "Public Access" ON storage.objects;
 CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'cleanmap-evidence');
 
