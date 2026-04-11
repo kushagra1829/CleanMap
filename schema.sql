@@ -15,6 +15,9 @@ CREATE TABLE IF NOT EXISTS reports (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Ensure table is fully accessible for demo
+ALTER TABLE reports DISABLE ROW LEVEL SECURITY;
+
 -- 2. ENABLE REALTIME for this table
 -- This allows the map and leaderboard to update without refreshing
 BEGIN;
