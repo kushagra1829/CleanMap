@@ -1,40 +1,42 @@
 # CleanMap 🌿
 
-CleanMap is a community-driven waste reporting and cleanup tracking application. It allows citizens to flag waste hot-spots via an interactive map, lets volunteers claim the reports, and tracks progress via a central dashboard.
+CleanMap is a community-driven platform built to tackle waste reporting and tracking in real-time. We wanted to build something that isn't just a static map, but an active tool for community "Eco-Warriors" to claim spots, clean them up, and climb a leaderboard.
 
-## Features
+The project was built using a serverless stack to make it fast, scalable, and easy to deploy.
 
-- **Interactive Maps**: Uses OpenFreeMap and MapLibre GL JS context.
-- **Reporting System**: Allows users to drop a pin on a map or use Geolocation tracking to submit waste spots with descriptions and severity metrics.
-- **Gamified Cleanup**: Volunteers can browse high-priority reports, claim spots for clean-up, and declare them as resolved.Volunteers earn points per cleanup based on severity:
-- Low=10pts,Medium=25pts,High=50pts.
-- The leaderboard shows top volunteers ranked by points.
-- **Real-Time Dashboard**: Monitor cleanup status, activity feeds, and statistics across local reports dynamically.
-- **Beautiful UI**: Modern glassmorphism design with a fully functional Dark/Light mode toggle.
-- **Multi Language Support**: Users can switch language to Hindi. 
+## Core Features
+
+- **Live Reporting**: Drop a pin anywhere on the map to flag a waste hotspot. You can add a title, description, and "Before" evidence photo.
+- **Real-Time Map & Sync**: No need to refresh. If someone else reports a spot or cleans one up, it pops up on your map instantly using Supabase Realtime.
+- **Cleanup Workflow**: Volunteers can browse high-priority reports, claim them for cleanup, and then "Prove" the work is done by uploading an "After" photo.
+- **Gamified Leaderboard**: Every cleanup earns points based on severity (High: 50, Medium: 25, Low: 10). Compete with the local community to top the charts.
+- **Bilingual Interface**: Full support for both English and Hindi. The entire UI—from legends to activity logs—switches dynamically.
+- **Dashboard Analytics**: Get a bird's-eye view of community activity, severity breakdowns, and a live log of recent actions.
 
 ## Tech Stack
 
-- **Frontend**: HTML5, Vanilla JavaScript, Vanilla CSS, MapLibre GL (via Leaflet bridge).
-- **Backend / Database**: Express (Node.js) runtime + better-sqlite3 for high-performance localized storage.
+- **Frontend**: Vanilla HTML/JS/CSS (kept it lean for performance).
+- **Maps**: MapLibre GL JS + Leaflet (using OpenFreeMap tiles).
+- **Backend / Database**: Node.js (Express) served as Vercel Serverless Functions.
+- **Cloud Infrastructure**: **Supabase** handles our PostgreSQL database, Realtime subscriptions, and Image Storage for "Before/After" photos.
 
-## How to Run Locally
+## Local Development
 
-### Prerequisites
+If you'd like to run this locally:
 
-- [Node.js](https://nodejs.org/) (v18+)
+1.  **Clone it**: `git clone <repo-url>`
+2.  **Install**: `npm install`
+3.  **Env Setup**: Create a `.env` file with your `SUPABASE_URL` and `SUPABASE_KEY`.
+4.  **Database**: Run the SQL in `schema.sql` inside your Supabase SQL Editor to set up the tables and storage buckets.
+5.  **Run**: `npm run dev`
 
-### Steps
+## Deployment
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Start the server:
-   ```bash
-   npm run dev
-   ```
-3. Open the app in your browser at [http://localhost:3000](http://localhost:3000)
+This app is designed to run on **Vercel**. When deploying:
+- Set `SUPABASE_URL` and `SUPABASE_KEY` as environment variables in the Vercel dashboard.
+- The backend logic is located in `/api` to work seamlessly with Vercel's Serverless environment.
 
-## License
-MIT
+Live Demo: [clean-map-rho.vercel.app](http://clean-map-rho.vercel.app)
+
+---
+*Built with ❤️ for a cleaner community.*
