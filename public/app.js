@@ -399,7 +399,7 @@ function renderMapMarkers() {
 // API INTERACTIONS (Claims & Clean)
 // ═══════════════════════════════════════════
 window.claimReport = async function(id) {
-  const volName = prompt(translations[currentLang].enter_vol_name, "John D.");
+  const volName = prompt(translations[currentLang].enter_vol_name, "");
   if (!volName) return;
   try {
     const res = await fetch(`${API_BASE}/reports/${id}/claim`, {
