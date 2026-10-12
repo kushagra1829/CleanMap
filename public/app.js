@@ -272,6 +272,35 @@ const mainMap = L.map('map', { zoomControl: false }).setView(CENTER, 14);
 mainTileLayer = createTileLayer(mainMap, currentMapStyle);
 L.control.zoom({ position: 'topright' }).addTo(mainMap);
 
+// Main Map Locate Control
+let mainUserMarker = null;
+const mapLocateBtn = document.getElementById('map-locate-btn');
+if (mapLocateBtn) {
+  mapLocateBtn.addEventListener('click', async () => {
+    mapLocateBtn.classList.add('locating');
+    mapLocateBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
+    try {
+      const coords = await getUserCoordinates();
+      mainMap.flyTo([coords.lat, coords.lng], 15, { duration: 1.5 });
+      if (mainUserMarker) mainMap.removeLayer(mainUserMarker);
+      mainUserMarker = L.circleMarker([coords.lat, coords.lng], {
+        radius: 8,
+        fillColor: '#3b82f6',
+        color: '#ffffff',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.9
+      }).addTo(mainMap).bindPopup("📍 You are here").openPopup();
+      showToast(true, "Centered map on your current location");
+    } catch (err) {
+      showToast(false, "Could not determine location. Please check browser permissions.");
+    } finally {
+      mapLocateBtn.classList.remove('locating');
+      mapLocateBtn.innerHTML = '<i class="ph ph-crosshair"></i>';
+    }
+  });
+}
+
 let mainMarkers = {};
 let reportTabMarkers = {};
 
@@ -570,13 +599,136 @@ L.control.zoom({ position: 'topright' }).addTo(reportMap);
 
 let reportPin = null, reportLatLng = null, selectedSeverity = null;
 
+// ═══════════════════════════════════════════
+// GEOLOCATION ENGINE & FALLBACKS
+// ═══════════════════════════════════════════
+function getUserCoordinates() {
+  return new Promise((resolve, reject) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        },
+        (err) => {
+          console.warn("High-accuracy GPS failed or timed out, trying low-accuracy...", err);
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            },
+            async (err2) => {
+              console.warn("Low-accuracy GPS failed, falling back to IP location...", err2);
+              await fallbackIpLocation(resolve, reject, err2);
+            },
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+          );
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+      );
+    } else {
+      fallbackIpLocation(resolve, reject);
+    }
+  });
+}
+
+async function fallbackIpLocation(resolve, reject, originalError) {
+  try {
+    const res = await fetch('https://ipwho.is/');
+    const data = await res.json();
+    if (data && data.success && data.latitude && data.longitude) {
+      resolve({
+        lat: data.latitude,
+        lng: data.longitude,
+        suggestedName: [data.city, data.region, data.country].filter(Boolean).join(', ')
+      });
+      return;
+    }
+  } catch (ipErr) {
+    console.warn("IP Geolocation failed:", ipErr);
+  }
+  reject(originalError || new Error("Location access unavailable"));
+}
+
+async function handleUseGPS() {
+  const pinBox = document.getElementById('pin-indicator');
+  const originalHtml = pinBox.innerHTML;
+  pinBox.classList.add('active');
+  pinBox.innerHTML = `<i class="ph ph-spinner ph-spin"></i><span>Acquiring GPS location...</span>`;
+
+  try {
+    const coords = await getUserCoordinates();
+    reportLatLng = { lat: coords.lat, lng: coords.lng };
+
+    if (reportPin) reportMap.removeLayer(reportPin);
+    reportPin = L.marker([coords.lat, coords.lng], {
+      icon: L.divIcon({
+        className: '',
+        html: `<div class="marker-pin" style="color: var(--color-progress);"></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      }),
+      zIndexOffset: 1000
+    }).addTo(reportMap);
+
+    reportMap.setView([coords.lat, coords.lng], 16);
+    setTimeout(() => reportMap.invalidateSize(), 100);
+
+    pinBox.innerHTML = `
+      <i class="ph-fill ph-map-pin"></i>
+      <span>Set to: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}</span>
+      <button class="btn-text" id="geo-btn" style="text-decoration: underline; margin-top: 4px;">Update GPS</button>
+    `;
+
+    // Attempt to reverse geocode and prefill Landmark / Street
+    const locInput = document.getElementById('report-location');
+    if (!locInput.value.trim()) {
+      if (coords.suggestedName) {
+        locInput.value = coords.suggestedName;
+      }
+      try {
+        const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}`);
+        const revData = await revRes.json();
+        if (revData && revData.address) {
+          const a = revData.address;
+          const road = a.road || a.pedestrian || a.street || a.suburb;
+          const city = a.city || a.town || a.municipality || a.county;
+          const country = a.country;
+          const formatted = [road, city, country].filter(Boolean).join(', ');
+          if (formatted) locInput.value = formatted;
+        }
+      } catch (e) {
+        // Reverse geocoding error can be ignored
+      }
+    }
+
+    showToast(true, `GPS location set (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`);
+    checkFormValidity();
+  } catch (err) {
+    console.error("GPS error:", err);
+    pinBox.innerHTML = originalHtml;
+    showToast(false, "Could not acquire GPS. Please click directly on the map.");
+  }
+}
+
+// Global click delegation for any Use GPS button
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#geo-btn');
+  if (btn) {
+    e.preventDefault();
+    handleUseGPS();
+  }
+});
+
 reportMap.on('click', (e) => {
   reportLatLng = e.latlng;
   if (reportPin) reportMap.removeLayer(reportPin);
   reportPin = L.marker(e.latlng, { icon: L.divIcon({ className: '', html: `<div class="marker-pin" style="color: var(--color-progress);"></div>`, iconSize: [24, 24], iconAnchor: [12, 12] }), zIndexOffset: 1000 }).addTo(reportMap);
   const pinBox = document.getElementById('pin-indicator');
   pinBox.classList.add('active');
-  pinBox.innerHTML = `<i class="ph-fill ph-map-pin"></i><span>Set to: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}</span>`;
+  pinBox.innerHTML = `
+    <i class="ph-fill ph-map-pin"></i>
+    <span>Set to: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}</span>
+    <button class="btn-text" id="geo-btn" style="text-decoration: underline; margin-top: 4px;">Use GPS instead</button>
+  `;
   checkFormValidity();
 });
 

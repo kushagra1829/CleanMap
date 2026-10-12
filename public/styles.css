@@ -526,3 +526,38 @@ html[data-theme="dark"] .theme-icon-dark { display: none; }
 }
 .toast.show { bottom: 30px; }
 .toast i { font-size: 1.2rem; color: var(--color-low); }
+
+/* ═════ Locate Me Control ═════ */
+.map-locate-btn {
+  position: absolute;
+  top: 90px;
+  right: 12px;
+  z-index: 1000;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  color: var(--text-main);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.map-locate-btn:hover {
+  background: var(--bg-hover);
+  color: var(--accent-primary);
+  transform: scale(1.05);
+}
+.map-locate-btn.locating {
+  animation: pulse-locate 1.2s infinite ease-in-out;
+  color: var(--color-progress);
+}
+@keyframes pulse-locate {
+  0% { transform: scale(0.96); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(0.96); opacity: 0.7; }
+}
