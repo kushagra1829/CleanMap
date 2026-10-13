@@ -170,12 +170,32 @@ async function init() {
 }
 
 async function fetchReports(params = {}) {
+  const badge = document.getElementById('db-status-badge');
+  const badgeText = document.getElementById('db-status-text');
+
   try {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_BASE}/reports${query ? '?' + query : ''}`);
+    const res = await fetch(`${API_BASE}/reports${query ? '?' + query : ''}`, { cache: 'no-store' });
     const data = await res.json();
-    if (data.success) reports = data.data;
-  } catch (err) { console.error(err); }
+    if (data.success) {
+      reports = data.data;
+      if (badge && badgeText) {
+        badge.className = 'db-status-badge connected';
+        badgeText.textContent = `Database Connected (${reports.length} reports)`;
+      }
+    } else {
+      if (badge && badgeText) {
+        badge.className = 'db-status-badge error';
+        badgeText.textContent = 'Database Error';
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    if (badge && badgeText) {
+      badge.className = 'db-status-badge error';
+      badgeText.textContent = 'Database Offline';
+    }
+  }
 }
 
 async function refreshAllQuietly() {
